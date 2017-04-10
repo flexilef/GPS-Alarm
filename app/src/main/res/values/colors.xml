@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="OldcolorPrimary">#3F51B5</color>
+    <color name="OldcolorPrimaryDark">#303F9F</color>
+    <color name="OldcolorAccent">#FF4081</color>
+    <color name="colorAccent">#94c329</color>
+    <color name="colorPrimary">#84B229</color>
+    <color name="colorPrimaryDark">#739E52</color>
+    <color name="colorSecondary">#eff7e7</color>
+    <color name="colorSecondaryDark">#deebce</color>
+    <color name="colorTextNormal">#889C74</color>
+    <color name="colorTextAccent">#445038</color>
+</resources>
