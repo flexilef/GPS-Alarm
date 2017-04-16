@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorTextNormal">#ffffff</color>
     <color name="colorTextDisabled">#cccccc</color>
+    <color name="colorDividerDark">#555555</color>
 </resources>

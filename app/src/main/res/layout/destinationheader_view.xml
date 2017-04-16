@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginTop="12dp">
 
     <View
         android:id="@+id/view_divider"
@@ -44,19 +46,18 @@
         android:visibility="visible"
         tools:checked="false" />
 
-    <ImageButton
-        android:id="@+id/imageButton_arrowDown"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+    <ImageView
+        android:id="@+id/imageView_arrowDown"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/switch_destination"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="11dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="Arrow Down Button"
-        android:tint="@color/colorTextNormal"
+        android:contentDescription="Arrow Down Image"
+        android:padding="12dp"
         app:srcCompat="@android:drawable/arrow_down_float" />
 
 </RelativeLayout>

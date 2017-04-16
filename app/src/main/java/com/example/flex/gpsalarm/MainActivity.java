@@ -9,20 +9,23 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
-
-    //private List<DestinationRowItem> itemList;
-    //private RecyclerView.Adapter adapter;
+public class MainActivity extends AppCompatActivity implements
+    DestinationAdapter.DestinationItemListener {
+    public static String TAG = "MainActivity";
 
     private List<DestinationOptions> options;
     private List<DestinationHeader> destinations;
+
+    private ImageButton mDeleteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,23 +33,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        /*
-        itemList = new ArrayList<>();
-        itemList.add(new DestinationRowItem("1600 Hollowaysadfsdafsdafsdafsdfsdafsdafsda Ave", true));
-        itemList.add(new DestinationRowItem("250 Ave", false));
-        itemList.add(new DestinationRowItem("330 Grafton Ave", false));
-        itemList.add(new DestinationRowItem("123 Portrero Ave", false));
-        itemList.add(new DestinationRowItem("456 Russia Ave", false));
-        itemList.add(new DestinationRowItem("789 Paris Ave", false));
-        itemList.add(new DestinationRowItem("222 Hamilton Ave", false));
-        itemList.add(new DestinationRowItem("1111 Geary St", false));
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new DestinationListAdapter(itemList);
-        recyclerView.addItemDecoration(new DestinationDividerItemDecoration(this));
-        recyclerView.setAdapter(adapter);
-        */
 
         options = new ArrayList<>();
         destinations = new ArrayList<>();
@@ -56,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         destinations.add(new DestinationHeader("1600 Holloway Ave", false, options));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
-        DestinationAdapter adapter = new DestinationAdapter(this, destinations);
+        final DestinationAdapter adapter = new DestinationAdapter(this, destinations, this);
+
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -91,5 +78,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestinationClicked(int position) {
+        //TODO
+        Log.d(TAG, "Destination Position " + position);
+    }
+
+    @Override
+    public void onDeleteClicked(int position) {
+        //TODO
+        Log.d(TAG, "Delete Position " + position);
     }
 }
