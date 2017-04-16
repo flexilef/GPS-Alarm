@@ -25,10 +25,10 @@ public class DestinationAdapter
         void onDeleteClicked(int position);
     }
 
-    public DestinationAdapter(Context context, @NonNull List<DestinationHeader> destinationList, DestinationItemListener listener) {
+    public DestinationAdapter(Context context, @NonNull List<DestinationHeader> destinationList) {
         super(destinationList);
 
-        mListener = listener;
+        mListener = (DestinationItemListener) context;
         mInflater = LayoutInflater.from(context);
     }
 

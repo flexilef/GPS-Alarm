@@ -16,14 +16,13 @@ public class DestinationOptionsViewHolder extends ChildViewHolder {
     public DestinationOptionsViewHolder(View view, final DestinationAdapter.DestinationItemListener listener) {
         super(view);
 
-        view.setOnClickListener(new View.OnClickListener() {
+        mDeleteButton = (ImageButton) view.findViewById(R.id.imageButton_delete);
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onDeleteClicked(getParentAdapterPosition());
             }
         });
-
-        mDeleteButton = (ImageButton) view.findViewById(R.id.imageButton_delete);
     }
 
     public void bind(DestinationOptions options) {

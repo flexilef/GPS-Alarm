@@ -42,7 +42,8 @@ public class MainActivity extends AppCompatActivity implements
         destinations.add(new DestinationHeader("1600 Holloway Ave", false, options));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
-        final DestinationAdapter adapter = new DestinationAdapter(this, destinations, this);
+        //final DestinationAdapter adapter = new DestinationAdapter(this, destinations, this);
+        final DestinationAdapter adapter = new DestinationAdapter(this, destinations);
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

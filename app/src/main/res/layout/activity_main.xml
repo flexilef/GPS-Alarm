@@ -27,7 +27,7 @@
         android:layout_gravity="top|center_horizontal"
         android:layout_margin="@dimen/fab_margin"
         android:tint="@color/colorTextNormal"
-        app:backgroundTint="@color/colorPrimary"
+        app:backgroundTint="@color/colorAccent"
         app:layout_anchor="@+id/include"
         app:layout_anchorGravity="bottom|center_horizontal"
         app:srcCompat="@android:drawable/ic_input_add" />
