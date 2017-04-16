@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
     private List<DestinationRowItem> itemList;
     private RecyclerView.Adapter adapter;
-    private DividerItemDecoration mDividerItemDecoration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +32,11 @@ public class MainActivity extends AppCompatActivity {
         itemList.add(new DestinationRowItem("1600 Hollowaysadfsdafsdafsdafsdfsdafsdafsda Ave", true));
         itemList.add(new DestinationRowItem("250 Ave", false));
         itemList.add(new DestinationRowItem("330 Grafton Ave", false));
+        itemList.add(new DestinationRowItem("123 Portrero Ave", false));
+        itemList.add(new DestinationRowItem("456 Russia Ave", false));
+        itemList.add(new DestinationRowItem("789 Paris Ave", false));
+        itemList.add(new DestinationRowItem("222 Hamilton Ave", false));
+        itemList.add(new DestinationRowItem("1111 Geary St", false));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addItemDecoration(new DestinationDividerItemDecoration(this));
         recyclerView.setAdapter(adapter);
 
+
+        //button code
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.FloatingActionButton_AddDestination);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
