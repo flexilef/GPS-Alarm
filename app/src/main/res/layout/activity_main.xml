@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:layout_margin="@dimen/fab_margin"
-        android:tint="@color/colorSecondary"
+        android:tint="@color/colorTextNormal"
         app:backgroundTint="@color/colorPrimary"
         app:layout_anchor="@+id/include"
         app:layout_anchorGravity="bottom|center_horizontal"

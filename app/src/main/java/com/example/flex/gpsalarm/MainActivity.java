@@ -18,8 +18,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<DestinationRowItem> itemList;
-    private RecyclerView.Adapter adapter;
+    //private List<DestinationRowItem> itemList;
+    //private RecyclerView.Adapter adapter;
+
+    private List<DestinationOptions> options;
+    private List<DestinationHeader> destinations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        /*
         itemList = new ArrayList<>();
         itemList.add(new DestinationRowItem("1600 Hollowaysadfsdafsdafsdafsdfsdafsdafsda Ave", true));
         itemList.add(new DestinationRowItem("250 Ave", false));
@@ -43,7 +46,19 @@ public class MainActivity extends AppCompatActivity {
         adapter = new DestinationListAdapter(itemList);
         recyclerView.addItemDecoration(new DestinationDividerItemDecoration(this));
         recyclerView.setAdapter(adapter);
+        */
 
+        options = new ArrayList<>();
+        destinations = new ArrayList<>();
+
+        options.add(new DestinationOptions("Label 1"));
+        destinations.add(new DestinationHeader("250 Flood Ave", false, options));
+        destinations.add(new DestinationHeader("1600 Holloway Ave", false, options));
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
+        DestinationAdapter adapter = new DestinationAdapter(this, destinations);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //button code
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.FloatingActionButton_AddDestination);

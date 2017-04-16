@@ -9,13 +9,13 @@
         android:id="@+id/view_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/imageButton_arrowdown"
+        android:layout_below="@+id/imageButton_arrowDown"
         android:layout_margin="12dp"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:background="@color/colorSecondaryDark"
+        android:background="@color/colorPrimary"
         android:visibility="gone" />
 
     <TextView
@@ -23,27 +23,21 @@
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginEnd="12dp"
         android:layout_marginLeft="24dp"
-        android:layout_marginRight="12dp"
         android:layout_marginStart="24dp"
         android:gravity="center_vertical|start"
         android:text="TextView"
-        android:textColor="@color/colorTextAccent"
+        android:textColor="@color/colorTextDisabled"
         android:textSize="24sp"
         tools:text="@string/test_destination" />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/switch_destination"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/TextView_savedDestination"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_gravity="center_vertical|end"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="12dp"
-        android:layout_toEndOf="@id/TextView_savedDestination"
+        android:layout_toEndOf="@+id/TextView_savedDestination"
         android:layout_toRightOf="@+id/TextView_savedDestination"
         android:checked="false"
         android:gravity="center|end"
@@ -51,22 +45,18 @@
         tools:checked="false" />
 
     <ImageButton
-        android:id="@+id/imageButton_delete"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignLeft="@+id/view_divider"
-        android:layout_alignStart="@+id/view_divider"
-        android:layout_alignTop="@+id/view_divider"
-        android:visibility="gone"
-        app:srcCompat="@android:drawable/ic_delete" />
-
-    <ImageButton
-        android:id="@+id/imageButton_arrowdown"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:srcCompat="@android:drawable/arrow_down_float"
+        android:id="@+id/imageButton_arrowDown"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/switch_destination"
-        android:layout_alignRight="@+id/switch_destination"
-        android:layout_alignEnd="@+id/switch_destination" />
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="11dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Arrow Down Button"
+        android:tint="@color/colorTextNormal"
+        app:srcCompat="@android:drawable/arrow_down_float" />
 
 </RelativeLayout>
