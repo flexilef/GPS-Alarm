@@ -22,9 +22,11 @@ public class MainActivity extends AppCompatActivity implements
     DestinationAdapter.DestinationItemListener {
     public static String TAG = "MainActivity";
 
-    private List<DestinationOptions> options;
-    private List<DestinationHeader> destinations;
+    private List<DestinationOptions> mOptions;
+    private List<DestinationHeader> mDestinations;
 
+    private DestinationAdapter mAdapter;
+    private RecyclerView mRecyclerView;
     private ImageButton mDeleteButton;
 
     @Override
@@ -34,18 +36,17 @@ public class MainActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        options = new ArrayList<>();
-        destinations = new ArrayList<>();
+        mOptions = new ArrayList<>();
+        mDestinations = new ArrayList<>();
 
-        options.add(new DestinationOptions("Label 1"));
-        destinations.add(new DestinationHeader("250 Flood Ave", false, options));
-        destinations.add(new DestinationHeader("1600 Holloway Ave", false, options));
+        mOptions.add(new DestinationOptions("Label 1"));
+        mDestinations.add(new DestinationHeader("250 Flood Ave", false, mOptions));
+        mDestinations.add(new DestinationHeader("1600 Holloway Ave", false, mOptions));
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
-        //final DestinationAdapter adapter = new DestinationAdapter(this, destinations, this);
-        final DestinationAdapter adapter = new DestinationAdapter(this, destinations);
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
+        mAdapter = new DestinationAdapter(this, mDestinations);
 
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //button code
@@ -53,8 +54,11 @@ public class MainActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                //TODO: replace with map activity
+                Log.d(TAG, "fab clicked");
+                mDestinations.add(new DestinationHeader("New Destination Address", true, mOptions));
+                mAdapter.notifyParentInserted(mDestinations.size()-1);
+                recyclerView.scrollToPosition(mDestinations.size()-1);
             }
         });
     }
@@ -83,13 +87,14 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onDestinationClicked(int position) {
-        //TODO
+        //TODO: start map activity
         Log.d(TAG, "Destination Position " + position);
     }
 
     @Override
     public void onDeleteClicked(int position) {
-        //TODO
         Log.d(TAG, "Delete Position " + position);
+        mDestinations.remove(position);
+        mAdapter.notifyParentRemoved(position);
     }
 }
