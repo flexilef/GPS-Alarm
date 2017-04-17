@@ -1,5 +1,6 @@
 package com.example.flex.gpsalarm;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements
     public void onDestinationClicked(int position) {
         //TODO: start map activity
         Log.d(TAG, "Destination Position " + position);
+        Intent mapsIntent = new Intent(this, DestinationMapsActivity.class);
+        startActivity(mapsIntent);
     }
 
     @Override
