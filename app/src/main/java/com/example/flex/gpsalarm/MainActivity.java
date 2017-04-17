@@ -1,6 +1,7 @@
 package com.example.flex.gpsalarm;
 
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -14,20 +15,20 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
     DestinationAdapter.DestinationItemListener {
-    public static String TAG = "MainActivity";
+    private static String TAG = "MainActivity";
 
-    private List<DestinationOptions> mOptions;
     private List<DestinationHeader> mDestinations;
+    private List<DestinationOptions> mOptions;
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private ImageButton mDeleteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +44,11 @@ public class MainActivity extends AppCompatActivity implements
         mDestinations.add(new DestinationHeader("250 Flood Ave", false, mOptions));
         mDestinations.add(new DestinationHeader("1600 Holloway Ave", false, mOptions));
 
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
         mAdapter = new DestinationAdapter(this, mDestinations);
 
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //button code
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.FloatingActionButton_AddDestination);
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements
                 Log.d(TAG, "fab clicked");
                 mDestinations.add(new DestinationHeader("New Destination Address", true, mOptions));
                 mAdapter.notifyParentInserted(mDestinations.size()-1);
-                recyclerView.scrollToPosition(mDestinations.size()-1);
+                mRecyclerView.scrollToPosition(mDestinations.size()-1);
             }
         });
     }
@@ -92,9 +93,44 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDeleteClicked(int position) {
+    public void onDeleteClicked(final int position) {
         Log.d(TAG, "Delete Position " + position);
+
+        final DestinationHeader destination = mDestinations.get(position);
+
         mDestinations.remove(position);
         mAdapter.notifyParentRemoved(position);
+
+        //generate an undo snackbar
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDestinations.add(position, destination);
+                mAdapter.notifyParentInserted(position);
+            }
+        };
+        displayUndoDeleteSnackbar(listener);
+    }
+
+    @Override
+    public void onSwitchClicked(int position, boolean isChecked) {
+        Log.d(TAG, "switch Checked:" + isChecked);
+
+        mDestinations.get(position).setSwitchChecked(isChecked);
+        // Uncommenting the code below will cause a crash because of
+        // circular code involving the switch listener in view holder and
+        // the onBind function in adapter
+        // The code below is unecessary anyways since switch listener
+        // updates the UI so there isn't a need to notify the adapter to update UI
+        // mAdapter.notifyParentChanged(position);
+    }
+
+    private void displayUndoDeleteSnackbar(View.OnClickListener listener) {
+        CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.coordinatorlayout_main);
+
+        Snackbar snackbar = Snackbar.make(layout, "Destination deleted", Snackbar.LENGTH_LONG)
+                .setAction("Undo", listener);
+
+        snackbar.show();
     }
 }

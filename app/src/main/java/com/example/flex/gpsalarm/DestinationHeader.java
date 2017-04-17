@@ -11,12 +11,12 @@ import java.util.List;
 public class DestinationHeader implements Parent<DestinationOptions> {
     private List<DestinationOptions> mOptions;
     private String mDestinationAddress;
-    private boolean mIsSwitchedOn;
+    private boolean mIsSwitchChecked;
 
-    public DestinationHeader(String destinationAddress, boolean isSwitchedOn, List<DestinationOptions> options) {
+    public DestinationHeader(String destinationAddress, boolean isChecked, List<DestinationOptions> options) {
         mOptions = options;
         mDestinationAddress = destinationAddress;
-        mIsSwitchedOn = isSwitchedOn;
+        mIsSwitchChecked = isChecked;
     }
 
     @Override
@@ -33,7 +33,9 @@ public class DestinationHeader implements Parent<DestinationOptions> {
         return mDestinationAddress;
     }
 
-    public boolean isSwitchedOn() {
-        return mIsSwitchedOn;
+    public boolean isSwitchChecked() {
+        return mIsSwitchChecked;
     }
+
+    public void setSwitchChecked(boolean isChecked) { mIsSwitchChecked = isChecked; }
 }

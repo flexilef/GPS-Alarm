@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.RotateAnimation;
@@ -21,6 +22,8 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
  */
 
 public class DestinationViewHolder extends ParentViewHolder {
+    private static final String TAG = "DestinationViewHolder";
+
     private static final float INITIAL_POSITION = 0.0f;
     private static final float ROTATED_POSITION = 180f;
     private static final boolean HONEYCOMB_AND_ABOVE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
@@ -66,13 +69,15 @@ public class DestinationViewHolder extends ParentViewHolder {
                 else {
                     mDestinationText.setTextColor(Color.rgb(204,204,204));
                 }
+
+                listener.onSwitchClicked(getParentAdapterPosition(), isChecked);
             }
         });
     }
 
     public void bind(DestinationHeader destination) {
         mDestinationText.setText(destination.getDestinationAddress());
-        mDestinationSwitch.setChecked(destination.isSwitchedOn());
+        mDestinationSwitch.setChecked(destination.isSwitchChecked());
     }
 
     @Override

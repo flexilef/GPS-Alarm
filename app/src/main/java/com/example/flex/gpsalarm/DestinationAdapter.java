@@ -2,6 +2,7 @@ package com.example.flex.gpsalarm;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +18,15 @@ import java.util.List;
 public class DestinationAdapter
         extends ExpandableRecyclerAdapter<DestinationHeader, DestinationOptions, DestinationViewHolder, DestinationOptionsViewHolder>
 {
+    private final String TAG = "DestinationAdapter";
+
     private LayoutInflater mInflater;
     private DestinationItemListener mListener;
 
     interface DestinationItemListener {
         void onDestinationClicked(int position);
         void onDeleteClicked(int position);
+        void onSwitchClicked(int position, boolean switchValue);
     }
 
     public DestinationAdapter(Context context, @NonNull List<DestinationHeader> destinationList) {
@@ -50,6 +54,7 @@ public class DestinationAdapter
     // onBind ...
     @Override
     public void onBindParentViewHolder(@NonNull DestinationViewHolder destinationViewHolder, int parentPosition, @NonNull DestinationHeader destinationHeader) {
+        Log.d(TAG, "Switched on: " + destinationHeader.isSwitchChecked());
         destinationViewHolder.bind(destinationHeader);
     }
 
