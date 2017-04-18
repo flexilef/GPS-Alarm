@@ -58,7 +58,8 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 //TODO: replace with map activity
                 Log.d(TAG, "fab clicked");
-                mDestinations.add(new DestinationHeader("New Destination Address", true, mOptions));
+                
+                mDestinations.add(new DestinationHeader("New Destination Address", false, mOptions));
                 mAdapter.notifyParentInserted(mDestinations.size()-1);
                 mRecyclerView.scrollToPosition(mDestinations.size()-1);
             }
@@ -117,8 +118,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onSwitchClicked(int position, boolean isChecked) {
-        Log.d(TAG, "switch Checked:" + isChecked);
-
         mDestinations.get(position).setSwitchChecked(isChecked);
         // Uncommenting the code below will cause a crash because of
         // circular code involving the switch listener in view holder and
