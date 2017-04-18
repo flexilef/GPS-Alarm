@@ -1,36 +1,56 @@
 package com.example.flex.gpsalarm;
 
 import android.Manifest;
-import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class DestinationMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static String TAG = "DestinationMapsActivity";
     private GoogleMap mMap;
-    private LocationManager mLocationManager;
+    //private LocationManager mLocationManager;
+
+    private Button mSetDestinationButton;
     private TextView mDestinationText;
+    private double mDestinationLatitude;
+    private double mDestinationLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination_maps);
 
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mDestinationText = (TextView) findViewById(R.id.textView_destination);
+        mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
+        mDestinationLatitude = 0;
+        mDestinationLongitude = 0;
+
+        mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Clicked on set destination");
+
+                Intent setDestinationIntent = new Intent(v.getContext(), MainActivity.class);
+                setDestinationIntent.putExtra("LATITUDE", mDestinationLatitude);
+                setDestinationIntent.putExtra("LONGITUDE", mDestinationLongitude);
+
+                setResult(RESULT_OK, setDestinationIntent);
+                finish();
+            }
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -52,10 +72,35 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        LatLng cameraCenter = mMap.getCameraPosition().target;
+        mDestinationLatitude = cameraCenter.latitude;
+        mDestinationLongitude = cameraCenter.longitude;
+
+        //final Marker centerMarker = mMap.addMarker(new MarkerOptions().position(cameraCenter).title("Camera Center"));
+
+        mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);
+
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                LatLng cameraCenter = mMap.getCameraPosition().target;
+                mDestinationLatitude = cameraCenter.latitude;
+                mDestinationLongitude = cameraCenter.longitude;
+
+                //centerMarker.setPosition(new LatLng(latitude, longitude));
+                mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);
+            }
+        });
+
+        /*
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                mDestinationText.setText(location.getLongitude() + ", " + location.getLatitude());
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+
+                centerMarker.setPosition(new LatLng(longitude, latitude));
+                mDestinationText.setText(longitude + ", " + latitude);
             }
 
             @Override
@@ -74,6 +119,7 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
             }
         };
 
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -91,6 +137,7 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         showLastKnownLocation();
+        */
     }
 
     private void showLastKnownLocation() {
@@ -104,7 +151,7 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        /*Location location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         if (location != null) {
             LatLng myLocation = new LatLng(location.getLongitude(), location.getLatitude());
@@ -114,6 +161,6 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
             mDestinationText.setText(location.getLongitude() + ", " + location.getLatitude());
         } else {
             mDestinationText.setText("Unknown");
-        }
+        }*/
     }
 }

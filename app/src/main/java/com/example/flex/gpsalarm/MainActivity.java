@@ -24,6 +24,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements
     DestinationAdapter.DestinationItemListener {
     private static String TAG = "MainActivity";
+    private static int PICK_DESTINATION_CODE = 1;
 
     private List<DestinationHeader> mDestinations;
     private List<DestinationOptions> mOptions;
@@ -58,10 +59,11 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 //TODO: replace with map activity
                 Log.d(TAG, "fab clicked");
-                
-                mDestinations.add(new DestinationHeader("New Destination Address", false, mOptions));
+                Intent mapsIntent = new Intent(view.getContext(), DestinationMapsActivity.class);
+                startActivityForResult(mapsIntent, PICK_DESTINATION_CODE);
+/*                mDestinations.add(new DestinationHeader("New Destination Address", false, mOptions));
                 mAdapter.notifyParentInserted(mDestinations.size()-1);
-                mRecyclerView.scrollToPosition(mDestinations.size()-1);
+                mRecyclerView.scrollToPosition(mDestinations.size()-1);*/
             }
         });
     }
@@ -89,11 +91,27 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "On activity result");
+        if(requestCode == PICK_DESTINATION_CODE) {
+            if(resultCode == RESULT_OK) {
+                double latitude, longitude;
+                latitude = data.getDoubleExtra("LATITUDE", 0.0);
+                longitude = data.getDoubleExtra("LONGITUDE", 0.0);
+
+                mDestinations.add(new DestinationHeader(latitude + "," + longitude, false, mOptions));
+                mAdapter.notifyParentInserted(mDestinations.size()-1);
+                mRecyclerView.scrollToPosition(mDestinations.size()-1);
+            }
+        }
+    }
+
+    @Override
     public void onDestinationClicked(int position) {
         //TODO: start map activity
         Log.d(TAG, "Destination Position " + position);
         Intent mapsIntent = new Intent(this, DestinationMapsActivity.class);
-        startActivity(mapsIntent);
+        startActivityForResult(mapsIntent, PICK_DESTINATION_CODE);
     }
 
     @Override
