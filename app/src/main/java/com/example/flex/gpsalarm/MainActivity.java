@@ -29,18 +29,22 @@ public class MainActivity extends AppCompatActivity implements
     DestinationAdapter.DestinationItemListener {
 
     private static String TAG = "MainActivity";
+
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
     private final String SHARED_PREFS_DESTINATIONS_KEY = "com.example.flex.gpsalarm.DESTINATIONS";
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
     private final int PICK_DESTINATION_CODE = 1;
+    private final int EDIT_DESTINATION_CODE = 2;
 
     private List<DestinationHeader> mDestinations;
     private List<DestinationOptions> mOptions;
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
+
+    private int mEditDestinationIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +132,27 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK) {
+            double latitude, longitude;
+            latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
+            longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
+
+            if(requestCode == PICK_DESTINATION_CODE) {
+                mDestinations.add(new DestinationHeader(latitude + "," + longitude, false, mOptions));
+
+                mAdapter.notifyParentInserted(mDestinations.size()-1);
+                mRecyclerView.scrollToPosition(mDestinations.size()-1);
+            }
+            else if(requestCode == EDIT_DESTINATION_CODE && mEditDestinationIndex >= 0) {
+                mDestinations.set(mEditDestinationIndex, new DestinationHeader(latitude + "," + longitude, false, mOptions));
+
+                mAdapter.notifyParentChanged(mEditDestinationIndex);
+                mRecyclerView.scrollToPosition(mEditDestinationIndex);
+            }
+
+            storeDestinations();
+        }
+        /*
         if(requestCode == PICK_DESTINATION_CODE) {
             if(resultCode == RESULT_OK) {
                 double latitude, longitude;
@@ -143,6 +168,22 @@ public class MainActivity extends AppCompatActivity implements
                 storeDestinations();
             }
         }
+        else if(requestCode == EDIT_DESTINATION_CODE) {
+            if(resultCode == RESULT_OK) {
+                double latitude, longitude;
+                latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
+                longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
+
+                //insert destination into list and notify recycler view
+                mDestinations.add(new DestinationHeader(latitude + "," + longitude, false, mOptions));
+
+                mAdapter.notifyParentInserted(mDestinations.size()-1);
+                mRecyclerView.scrollToPosition(mDestinations.size()-1);
+
+                storeDestinations();
+            }
+        }
+        */
     }
 
     /* Start DestinationItemListener functions */
@@ -153,8 +194,10 @@ public class MainActivity extends AppCompatActivity implements
     public void onDestinationClicked(int position) {
         Log.d(TAG, "Destination Position " + position);
 
+        mEditDestinationIndex = position;
+
         Intent mapsIntent = new Intent(this, DestinationMapsActivity.class);
-        startActivityForResult(mapsIntent, PICK_DESTINATION_CODE);
+        startActivityForResult(mapsIntent, EDIT_DESTINATION_CODE);
     }
 
     @Override
