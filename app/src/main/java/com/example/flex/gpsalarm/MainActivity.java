@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "on stop");
 
         super.onStop();
+        storeDestinations();
     }
 
     @Override
@@ -149,47 +150,12 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.notifyParentChanged(mEditDestinationIndex);
                 mRecyclerView.scrollToPosition(mEditDestinationIndex);
             }
-
-            storeDestinations();
         }
-        /*
-        if(requestCode == PICK_DESTINATION_CODE) {
-            if(resultCode == RESULT_OK) {
-                double latitude, longitude;
-                latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
-                longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
-
-                //insert destination into list and notify recycler view
-                mDestinations.add(new DestinationHeader(latitude + "," + longitude, false, mOptions));
-
-                mAdapter.notifyParentInserted(mDestinations.size()-1);
-                mRecyclerView.scrollToPosition(mDestinations.size()-1);
-
-                storeDestinations();
-            }
-        }
-        else if(requestCode == EDIT_DESTINATION_CODE) {
-            if(resultCode == RESULT_OK) {
-                double latitude, longitude;
-                latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
-                longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
-
-                //insert destination into list and notify recycler view
-                mDestinations.add(new DestinationHeader(latitude + "," + longitude, false, mOptions));
-
-                mAdapter.notifyParentInserted(mDestinations.size()-1);
-                mRecyclerView.scrollToPosition(mDestinations.size()-1);
-
-                storeDestinations();
-            }
-        }
-        */
     }
 
     /* Start DestinationItemListener functions */
 
     @Override
-    //TODO: change PICK_DESTINATION_CODE to EDIT_DESTINATIONCODE
     //pass extra in the intent back with the position of the destination clicked
     public void onDestinationClicked(int position) {
         Log.d(TAG, "Destination Position " + position);
@@ -208,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements
 
         mDestinations.remove(position);
         mAdapter.notifyParentRemoved(position);
-        storeDestinations();
 
         //generate an undo snackbar
         View.OnClickListener listener = new View.OnClickListener() {
