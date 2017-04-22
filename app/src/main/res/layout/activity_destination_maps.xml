@@ -12,6 +12,9 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         tools:context="com.example.flex.gpsalarm.DestinationMapsActivity" />
 
     <TextView
@@ -38,6 +41,15 @@
         android:text="Set Destination"
         android:textAlignment="center" />
 
+    <ImageView
+        android:id="@+id/imageView_cameraLocation"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_centerInParent="true"
+        android:contentDescription="Camera Position Marker"
+        android:src="@drawable/marker_96"
+        android:visibility="visible" />
+
     <ImageButton
         android:id="@+id/imageButton_myLocation"
         android:layout_width="48dp"
@@ -51,14 +63,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="My Location Button"
         android:cropToPadding="false"
-        android:tint="@color/colorPrimary"
-        app:srcCompat="@android:drawable/ic_menu_mylocation" />
-
-    <ImageView
-        android:id="@+id/imageView_cameraLocation"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_centerInParent="true"
-        app:srcCompat="?android:attr/textSelectHandle" />
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:tint="@color/colorAccent" />
 
 </RelativeLayout>
