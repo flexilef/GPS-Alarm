@@ -12,6 +12,9 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         tools:context="com.example.flex.gpsalarm.DestinationMapsActivity" />
 
     <TextView
@@ -34,21 +37,33 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="4dp"
-        android:backgroundTint="@color/colorAccent"
+        android:background="@color/colorAccent"
         android:text="Set Destination"
         android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/imageView_cameraLocation"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_centerInParent="true"
+        android:contentDescription="Camera Position Marker"
+        android:src="@drawable/marker_96"
+        android:visibility="visible" />
 
     <ImageButton
         android:id="@+id/imageButton_myLocation"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginBottom="78dp"
-        android:layout_marginEnd="115dp"
-        android:layout_marginRight="115dp"
-        app:srcCompat="@android:drawable/ic_menu_mylocation"
         android:layout_above="@+id/textView_destination"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:adjustViewBounds="false"
+        android:background="@android:color/transparent"
+        android:contentDescription="My Location Button"
+        android:cropToPadding="false"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:tint="@color/colorAccent" />
 
 </RelativeLayout>
