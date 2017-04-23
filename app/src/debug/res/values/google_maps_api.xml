@@ -1,0 +1,26 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=CE:41:75:EE:5E:EC:A0:A4:2E:51:D5:6D:0C:33:40:F5:E2:11:72:5C%3Bcom.example.flex.gpsalarm
+
+    You can also add your credentials to an existing key, using these values:
+
+    Package name:
+    CE:41:75:EE:5E:EC:A0:A4:2E:51:D5:6D:0C:33:40:F5:E2:11:72:5C
+
+    SHA-1 certificate fingerprint:
+    CE:41:75:EE:5E:EC:A0:A4:2E:51:D5:6D:0C:33:40:F5:E2:11:72:5C
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyAlnj4isKwHOyxgCgaekHOfTxSMt9bPh78
+    </string>
+</resources>
