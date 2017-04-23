@@ -4,29 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:layout_marginTop="12dp">
-
-    <View
-        android:id="@+id/view_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/imageButton_arrowDown"
-        android:layout_margin="12dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:background="@color/colorPrimary"
-        android:visibility="gone" />
+    android:layout_gravity="top"
+    android:background="@drawable/selector_row"
+    android:paddingBottom="12dp"
+    android:paddingEnd="8dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingStart="8dp">
 
     <TextView
         android:id="@+id/TextView_savedDestination"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginLeft="24dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
         android:gravity="center_vertical|start"
         android:text="TextView"
         android:textColor="@color/colorTextDisabled"
@@ -37,8 +35,12 @@
         android:id="@+id/switch_destination"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/TextView_savedDestination"
-        android:layout_gravity="center_vertical|end"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="start"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="12dp"
         android:layout_toEndOf="@+id/TextView_savedDestination"
         android:layout_toRightOf="@+id/TextView_savedDestination"
         android:checked="false"
@@ -50,14 +52,27 @@
         android:id="@+id/imageView_arrowDown"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_alignParentBottom="false"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/switch_destination"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="11dp"
+        android:layout_toEndOf="@+id/TextView_savedDestination"
+        android:layout_toRightOf="@+id/TextView_savedDestination"
         android:contentDescription="Arrow Down Image"
         android:padding="12dp"
-        app:srcCompat="@android:drawable/arrow_down_float" />
+        app:srcCompat="@drawable/expand_arrow_48" />
+
+    <View
+        android:id="@+id/destination_view_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/colorTextDisabled"
+        android:visibility="visible" />
+
 
 </RelativeLayout>
