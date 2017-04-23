@@ -32,23 +32,22 @@ public class MainActivity extends AppCompatActivity implements
 
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
+    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
     private final String SHARED_PREFS_DESTINATIONS_KEY = "com.example.flex.gpsalarm.DESTINATIONS";
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
     private final int PICK_DESTINATION_CODE = 1;
     private final int EDIT_DESTINATION_CODE = 2;
 
-    private List<DestinationHeader> mDestinations;
-    private List<DestinationOptions> mOptions;
-
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
 
+    private List<DestinationHeader> mDestinations;
+    private List<DestinationOptions> mOptions;
     private int mEditDestinationIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "ON CREATE");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements
         restoreDestinations();
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
         mAdapter = new DestinationAdapter(this, mDestinations);
-
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -78,16 +76,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onResume() {
-        Log.d(TAG, "on resume");
-
-        super.onResume();
-    }
-
-    @Override
     protected void onStop() {
-        Log.d(TAG, "on stop");
-
         super.onStop();
         storeDestinations();
     }
@@ -134,11 +123,12 @@ public class MainActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
             double latitude, longitude;
+            String address = data.getStringExtra(EXTRA_KEY_ADDRESS);
             latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
             longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
 
             if(requestCode == PICK_DESTINATION_CODE) {
-                DestinationHeader destination = new DestinationHeader(latitude + "," + longitude, false, mOptions);
+                DestinationHeader destination = new DestinationHeader(address, false, mOptions);
                 destination.setLatitude(latitude);
                 destination.setLongitude(longitude);
 
@@ -148,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements
                 mRecyclerView.scrollToPosition(mDestinations.size()-1);
             }
             else if(requestCode == EDIT_DESTINATION_CODE && mEditDestinationIndex >= 0) {
-                DestinationHeader destination = new DestinationHeader(latitude + "," + longitude, false, mOptions);
+                DestinationHeader destination = new DestinationHeader(address, false, mOptions);
                 destination.setLatitude(latitude);
                 destination.setLongitude(longitude);
 

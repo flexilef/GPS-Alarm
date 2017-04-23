@@ -29,16 +29,17 @@ public class FetchAddressIntentService extends IntentService {
     public final class Constants {
         public static final int SUCCESS_RESULT = 0;
         public static final int FAILURE_RESULT = 1;
-        public static final String PACKAGE_NAME =
-                "package com.example.flex.gpsalarm";
+        public static final String PACKAGE_NAME = "package com.example.flex.gpsalarm";
         public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
         public static final String RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY";
         public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
     }
 
     private static String TAG = "FetchAddressIntentServ";
+
     private String mErrorMessage = "";
     private ResultReceiver mReceiver;
+    private Location mLocation;
 
     public FetchAddressIntentService() {
         super("FetchAddress");
@@ -49,11 +50,11 @@ public class FetchAddressIntentService extends IntentService {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
         mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
-        Location location = intent.getParcelableExtra(Constants.LOCATION_DATA_EXTRA);
+        mLocation = intent.getParcelableExtra(Constants.LOCATION_DATA_EXTRA);
         List<Address> addresses = null;
 
         try {
-            addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            addresses = geocoder.getFromLocation(mLocation.getLatitude(), mLocation.getLongitude(), 1);
         }
         catch(IOException ioException) {
             mErrorMessage = getString(R.string.service_not_available);
@@ -63,8 +64,8 @@ public class FetchAddressIntentService extends IntentService {
             // Catch invalid latitude or longitude values.
             mErrorMessage = getString(R.string.invalid_lat_long_used);
             Log.e(TAG, mErrorMessage + ". " +
-                    "Latitude = " + location.getLatitude() +
-                    ", Longitude = " + location.getLongitude(), illegalArgumentException);
+                    "Latitude = " + mLocation.getLatitude() +
+                    ", Longitude = " + mLocation.getLongitude(), illegalArgumentException);
         }
 
         // Handle case where no address was found
@@ -84,10 +85,10 @@ public class FetchAddressIntentService extends IntentService {
             for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
+
             Log.i(TAG, getString(R.string.address_found));
             deliverResultToReceiver(Constants.SUCCESS_RESULT,
-                    TextUtils.join(System.getProperty("line.separator"),
-                            addressFragments));
+                    TextUtils.join(System.getProperty("line.separator"), addressFragments));
         }
     }
 

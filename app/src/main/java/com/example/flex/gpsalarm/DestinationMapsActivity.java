@@ -22,42 +22,49 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class DestinationMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     public class AddressResultReceiver extends ResultReceiver {
-
         public AddressResultReceiver(Handler handler) {
             super(handler);
         }
 
         @Override
         protected  void onReceiveResult(int resultCode, Bundle resultData) {
-            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+            mDestinationAddress = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+            mDestinationText.setText(mDestinationAddress);
 
-            updateDestinationText(mAddressOutput);
+            if(resultCode == FetchAddressIntentService.Constants.FAILURE_RESULT) {
+                mSetDestinationButton.setEnabled(false);
+            }
+            else {
+                mSetDestinationButton.setEnabled(true);
+            }
         }
     }
 
     private static String TAG = "DestinationMapsActivity";
+
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
+    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
+    private final double DEFAULT_LATITUDE = 0.0;
+    private final double DEFAULT_LONGITUDE = 0.0;
     private final int MAP_PADDING_BOTTOM_DP = 96;
 
     private GoogleMap mMap;
-
     private Button mSetDestinationButton;
     private TextView mDestinationText;
+
     private double mDestinationLatitude;
     private double mDestinationLongitude;
+    private String mDestinationAddress;
 
     //service variables
     private AddressResultReceiver mResultReceiver;
-    private Location mLastLocation;
+    private Location mDestinationLocation;
     private Handler mUiHandler;
-    private String mAddressOutput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +77,8 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         mDestinationText = (TextView) findViewById(R.id.textView_destination);
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
 
-        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, 0.0);
-        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, 0.0);
+        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
 
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +88,7 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
                 Intent setDestinationIntent = new Intent(v.getContext(), MainActivity.class);
                 setDestinationIntent.putExtra(EXTRA_KEY_LATITUDE, mDestinationLatitude);
                 setDestinationIntent.putExtra(EXTRA_KEY_LONGITUDE, mDestinationLongitude);
+                setDestinationIntent.putExtra(EXTRA_KEY_ADDRESS, mDestinationAddress);
 
                 setResult(RESULT_OK, setDestinationIntent);
                 finish();
@@ -112,10 +120,10 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(initPosition));
 
-        LatLng cameraCenter = mMap.getCameraPosition().target;
+/*        LatLng cameraCenter = mMap.getCameraPosition().target;
         mDestinationLatitude = cameraCenter.latitude;
         mDestinationLongitude = cameraCenter.longitude;
-        mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);
+        mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);*/
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -131,11 +139,11 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                mLastLocation = new Location("");
-                mLastLocation.setLatitude(mDestinationLatitude);
-                mLastLocation.setLongitude(mDestinationLongitude);
+                mDestinationLocation = new Location("");
+                mDestinationLocation.setLatitude(mDestinationLatitude);
+                mDestinationLocation.setLongitude(mDestinationLongitude);
 
-                startFetAddressIntentService();
+                startFetchAddressIntentService();
             }
         });
     }
@@ -161,15 +169,11 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         map.setMyLocationEnabled(true);
     }
 
-    private void startFetAddressIntentService() {
+    private void startFetchAddressIntentService() {
         Intent intent = new Intent(this, FetchAddressIntentService.class);
 
         intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mDestinationLocation);
         startService(intent);
-    }
-
-    private void updateDestinationText(String address) {
-        mDestinationText.setText(address);
     }
 }
