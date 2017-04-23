@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">GpsAlarm</string>
-    <string name="action_settings">Settings</string>
-    <string name="test_destination">test destination</string>
-    <string name="delete">Delete</string>
-    <string name="title_activity_destination_maps">Map</string>
-</resources>
