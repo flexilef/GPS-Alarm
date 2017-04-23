@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:layout_marginTop="12dp">
+    android:layout_marginTop="12dp"
+    android:padding="8dp">
 
     <View
         android:id="@+id/view_divider"
@@ -24,9 +25,13 @@
         android:id="@+id/TextView_savedDestination"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginLeft="24dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_toLeftOf="@+id/imageView_arrowDown"
         android:gravity="center_vertical|start"
         android:text="TextView"
         android:textColor="@color/colorTextDisabled"
@@ -37,8 +42,9 @@
         android:id="@+id/switch_destination"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/TextView_savedDestination"
-        android:layout_gravity="center_vertical|end"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="start"
         android:layout_toEndOf="@+id/TextView_savedDestination"
         android:layout_toRightOf="@+id/TextView_savedDestination"
         android:checked="false"

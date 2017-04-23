@@ -3,8 +3,13 @@ package com.example.flex.gpsalarm;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.SwitchCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,17 +29,19 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 public class DestinationViewHolder extends ParentViewHolder {
     private static final String TAG = "DestinationViewHolder";
 
-    private static final float INITIAL_POSITION = 0.0f;
-    private static final float ROTATED_POSITION = 180f;
-    private static final boolean HONEYCOMB_AND_ABOVE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-    private static final float PIVOT_VALUE = 0.5f;
-    private static final long DEFAULT_ROTATE_DURATION_MS = 200;
+    private final float INITIAL_POSITION = 0.0f;
+    private final float ROTATED_POSITION = 180f;
+    private final boolean HONEYCOMB_AND_ABOVE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    private final float PIVOT_VALUE = 0.5f;
+    private final long DEFAULT_ROTATE_DURATION_MS = 200;
+    private final int PADDING_DP = 8;
+
 
     public TextView mDestinationText;
     public SwitchCompat mDestinationSwitch;
     public ImageView mExpandImage;
 
-    public DestinationViewHolder(View view, final DestinationAdapter.DestinationItemListener listener) {
+    public DestinationViewHolder(final View view, final DestinationAdapter.DestinationItemListener listener) {
         super(view);
 
         mDestinationText = (TextView) view.findViewById(R.id.TextView_savedDestination);
@@ -53,9 +60,17 @@ public class DestinationViewHolder extends ParentViewHolder {
             public void onClick(View v) {
                 if(isExpanded()) {
                     collapseView();
+
+                    int pixels = (int) getPixelsFromDp(view.getContext(), PADDING_DP);
+                    view.setPadding(pixels, pixels, pixels, pixels);
+                    view.setBackground(null);
                 }
                 else {
                     expandView();
+                    Drawable drawable = ContextCompat.getDrawable(view.getContext(), android.R.drawable.dialog_holo_light_frame);
+                    drawable.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(view.getContext(), R.color.colorPrimaryDark), PorterDuff.Mode.MULTIPLY));
+
+                    view.setBackground(drawable);
                 }
             }
         });
@@ -114,5 +129,11 @@ public class DestinationViewHolder extends ParentViewHolder {
         rotateAnimation.setFillAfter(true);
 
         mExpandImage.startAnimation(rotateAnimation);
+    }
+
+    private double getPixelsFromDp(Context context, int dp) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+
+        return dp * ((double)metrics.densityDpi/ DisplayMetrics.DENSITY_DEFAULT);
     }
 }
