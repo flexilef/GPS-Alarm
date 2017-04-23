@@ -3,6 +3,10 @@ package com.example.flex.gpsalarm;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.ResultReceiver;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -12,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.flex.gpsalarm.Services.FetchAddressIntentService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -22,29 +27,51 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class DestinationMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public class AddressResultReceiver extends ResultReceiver {
+
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected  void onReceiveResult(int resultCode, Bundle resultData) {
+            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+
+            updateDestinationText(mAddressOutput);
+        }
+    }
+
     private static String TAG = "DestinationMapsActivity";
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
     private final int MAP_PADDING_BOTTOM_DP = 96;
 
     private GoogleMap mMap;
-    //private LocationManager mLocationManager;
 
     private Button mSetDestinationButton;
     private TextView mDestinationText;
     private double mDestinationLatitude;
     private double mDestinationLongitude;
 
+    //service variables
+    private AddressResultReceiver mResultReceiver;
+    private Location mLastLocation;
+    private Handler mUiHandler;
+    private String mAddressOutput;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination_maps);
 
-        //mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mUiHandler = new Handler(Looper.getMainLooper());
+        mResultReceiver = new AddressResultReceiver(mUiHandler);
+
         mDestinationText = (TextView) findViewById(R.id.textView_destination);
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
+
         mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, 0.0);
-        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, 0.0);;
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, 0.0);
 
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,6 +107,7 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setPadding(0, 0, 0, (int)getPixelsFromDp(MAP_PADDING_BOTTOM_DP));
+        enableMyLocation(mMap);
 
         LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(initPosition));
@@ -96,85 +124,52 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
                 mDestinationLatitude = cameraCenter.latitude;
                 mDestinationLongitude = cameraCenter.longitude;
 
-                mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);
+                mDestinationText.setText(getString(R.string.updating_location));
             }
         });
 
-        /*
-        LocationListener locationListener = new LocationListener() {
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
-            public void onLocationChanged(Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
+            public void onCameraIdle() {
+                mLastLocation = new Location("");
+                mLastLocation.setLatitude(mDestinationLatitude);
+                mLastLocation.setLongitude(mDestinationLongitude);
 
-                centerMarker.setPosition(new LatLng(longitude, latitude));
-                mDestinationText.setText(longitude + ", " + latitude);
+                startFetAddressIntentService();
             }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        showLastKnownLocation();
-        */
-    }
-
-    private void showLastKnownLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        /*Location location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (location != null) {
-            LatLng myLocation = new LatLng(location.getLongitude(), location.getLatitude());
-            mMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
-
-            mDestinationText.setText(location.getLongitude() + ", " + location.getLatitude());
-        } else {
-            mDestinationText.setText("Unknown");
-        }*/
+        });
     }
 
     private double getPixelsFromDp(int dp) {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
 
         return dp * ((double)metrics.densityDpi/ DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    private void enableMyLocation(GoogleMap map) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
+    }
+
+    private void startFetAddressIntentService() {
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+
+        intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
+    }
+
+    private void updateDestinationText(String address) {
+        mDestinationText.setText(address);
     }
 }

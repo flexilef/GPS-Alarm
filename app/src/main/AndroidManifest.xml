@@ -41,6 +41,10 @@
         <activity
             android:name=".DestinationMapsActivity"
             android:label="@string/title_activity_destination_maps"></activity>
+
+        <service
+            android:name="com.example.flex.gpsalarm.Services.FetchAddressIntentService"
+            android:exported="false" />
     </application>
 
 </manifest>
