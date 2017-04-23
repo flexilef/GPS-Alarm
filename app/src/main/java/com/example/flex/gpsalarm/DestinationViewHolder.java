@@ -2,6 +2,7 @@ package com.example.flex.gpsalarm;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -61,16 +62,32 @@ public class DestinationViewHolder extends ParentViewHolder {
                 if(isExpanded()) {
                     collapseView();
 
+                /* For holo theme
                     int pixels = (int) getPixelsFromDp(view.getContext(), PADDING_DP);
                     view.setPadding(pixels, pixels, pixels, pixels);
-                    view.setBackground(null);
+                    view.setBackground(null);*/
+                    //view.setBackground(null);
+
+                    //view.setSelected(false);
                 }
                 else {
+                    listener.onExpandToggled(getParentAdapterPosition());
                     expandView();
+                    //view.setSelected(true);
+
+                    //view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.colorPrimaryDark));
+
+/*
+                    //For holo theme
                     Drawable drawable = ContextCompat.getDrawable(view.getContext(), android.R.drawable.dialog_holo_light_frame);
                     drawable.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(view.getContext(), R.color.colorPrimaryDark), PorterDuff.Mode.MULTIPLY));
+                    view.setBackground(drawable);*/
 
-                    view.setBackground(drawable);
+                    /* For single color
+                    int pixels = (int) getPixelsFromDp(view.getContext(), -8);
+                    ViewGroup.MarginLayoutParams  layout = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                    layout.setMargins(pixels, pixels, pixels, 0);
+                    view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.colorPrimaryDark));*/
                 }
             }
         });

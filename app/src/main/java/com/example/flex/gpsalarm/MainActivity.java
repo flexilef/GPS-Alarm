@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private LinearLayoutManager mLayoutManager;
 
     private List<DestinationHeader> mDestinations;
     private List<DestinationOptions> mOptions;
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
         mAdapter = new DestinationAdapter(this, mDestinations);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
         //button code
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.FloatingActionButton_AddDestination);
@@ -182,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 mDestinations.add(position, destination);
                 mAdapter.notifyParentInserted(position);
+                mRecyclerView.scrollToPosition(position);
             }
         };
         displayUndoDeleteSnackbar(listener);
@@ -197,6 +200,19 @@ public class MainActivity extends AppCompatActivity implements
         // The code below is unecessary anyways since switch listener
         // updates the UI so there isn't a need to notify the adapter to update UI
         // mAdapter.notifyParentChanged(position);
+    }
+
+    @Override
+    public void onExpandToggled(int position) {
+        mAdapter.collapseAllParents();
+
+        //to make last destination option visible and scrolled when parent item is expanded
+        mLayoutManager.scrollToPositionWithOffset(position, 0);
+
+
+/*        TODO: Fix bug where selected should scroll to top
+        Log.d(TAG, "Expand Position:" + position);
+        mLayoutManager.scrollToPositionWithOffset(position, 0);*/
     }
 
     /* Helpers */

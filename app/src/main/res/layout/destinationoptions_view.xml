@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:drawable/dialog_holo_light_frame"
-    android:backgroundTint="@color/colorPrimary"
-    android:backgroundTintMode="multiply">
+    android:background="@color/colorPrimaryDark">
 
     <ImageButton
         android:id="@+id/imageButton_delete"
@@ -16,8 +14,16 @@
         android:layout_marginStart="8dp"
         android:background="@android:color/transparent"
         android:contentDescription="Delete Button"
-        android:tint="@color/colorAccent"
-        android:visibility="visible"
-        app:srcCompat="@android:drawable/ic_menu_delete" />
+        android:src="@drawable/delete_48"
+        android:visibility="visible" />
+
+    <View
+        android:id="@+id/view_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="false"
+        android:layout_below="@+id/imageButton_delete"
+        android:background="@color/colorTextDisabled"
+        android:visibility="invisible" />
 
 </RelativeLayout>

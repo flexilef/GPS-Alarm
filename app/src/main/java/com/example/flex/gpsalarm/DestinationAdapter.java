@@ -27,6 +27,7 @@ public class DestinationAdapter
         void onDestinationClicked(int position);
         void onDeleteClicked(int position);
         void onSwitchClicked(int position, boolean switchValue);
+        void onExpandToggled(int position);
     }
 
     public DestinationAdapter(Context context, @NonNull List<DestinationHeader> destinationList) {
@@ -55,6 +56,7 @@ public class DestinationAdapter
     @Override
     public void onBindParentViewHolder(@NonNull DestinationViewHolder destinationViewHolder, int parentPosition, @NonNull DestinationHeader destinationHeader) {
         Log.d(TAG, "Switched on: " + destinationHeader.isSwitchChecked());
+        //TODO: see if you can pass in the child view holder or viewgroup so that you can modify it here
         destinationViewHolder.bind(destinationHeader);
     }
 
