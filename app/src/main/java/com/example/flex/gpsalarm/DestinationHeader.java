@@ -12,6 +12,8 @@ public class DestinationHeader implements Parent<DestinationOptions> {
     private List<DestinationOptions> mOptions;
     private String mDestinationAddress;
     private boolean mIsSwitchChecked;
+    private double mLatitude;
+    private double mLongitude;
 
     public DestinationHeader(String destinationAddress, boolean isChecked, List<DestinationOptions> options) {
         mOptions = options;
@@ -33,9 +35,17 @@ public class DestinationHeader implements Parent<DestinationOptions> {
         return mDestinationAddress;
     }
 
+    public double getLatitude() { return mLatitude; }
+
+    public double getLongitude() { return mLongitude; }
+
     public boolean isSwitchChecked() {
         return mIsSwitchChecked;
     }
 
     public void setSwitchChecked(boolean isChecked) { mIsSwitchChecked = isChecked; }
+
+    public void setLatitude(double latitude) { mLatitude = latitude; }
+
+    public void setLongitude(double longitude) { mLongitude = longitude; }
 }

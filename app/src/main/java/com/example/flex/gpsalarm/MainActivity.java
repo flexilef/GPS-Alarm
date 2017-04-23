@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: replace with map activity
                 Log.d(TAG, "fab clicked");
                 Intent mapsIntent = new Intent(view.getContext(), DestinationMapsActivity.class);
                 startActivityForResult(mapsIntent, PICK_DESTINATION_CODE);
@@ -139,13 +138,21 @@ public class MainActivity extends AppCompatActivity implements
             longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
 
             if(requestCode == PICK_DESTINATION_CODE) {
-                mDestinations.add(new DestinationHeader(latitude + "," + longitude, false, mOptions));
+                DestinationHeader destination = new DestinationHeader(latitude + "," + longitude, false, mOptions);
+                destination.setLatitude(latitude);
+                destination.setLongitude(longitude);
+
+                mDestinations.add(destination);
 
                 mAdapter.notifyParentInserted(mDestinations.size()-1);
                 mRecyclerView.scrollToPosition(mDestinations.size()-1);
             }
             else if(requestCode == EDIT_DESTINATION_CODE && mEditDestinationIndex >= 0) {
-                mDestinations.set(mEditDestinationIndex, new DestinationHeader(latitude + "," + longitude, false, mOptions));
+                DestinationHeader destination = new DestinationHeader(latitude + "," + longitude, false, mOptions);
+                destination.setLatitude(latitude);
+                destination.setLongitude(longitude);
+
+                mDestinations.set(mEditDestinationIndex, destination);
 
                 mAdapter.notifyParentChanged(mEditDestinationIndex);
                 mRecyclerView.scrollToPosition(mEditDestinationIndex);
@@ -161,8 +168,12 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "Destination Position " + position);
 
         mEditDestinationIndex = position;
+        double latitude = mDestinations.get(position).getLatitude();
+        double longitude = mDestinations.get(position).getLongitude();
 
         Intent mapsIntent = new Intent(this, DestinationMapsActivity.class);
+        mapsIntent.putExtra(EXTRA_KEY_LATITUDE, latitude);
+        mapsIntent.putExtra(EXTRA_KEY_LONGITUDE, longitude);
         startActivityForResult(mapsIntent, EDIT_DESTINATION_CODE);
     }
 

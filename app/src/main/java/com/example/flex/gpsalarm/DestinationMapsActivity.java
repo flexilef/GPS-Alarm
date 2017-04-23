@@ -6,19 +6,27 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class DestinationMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static String TAG = "DestinationMapsActivity";
+    private final String EXTRA_KEY_LATITUDE = "LATITUDE";
+    private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
+    private final int MAP_PADDING_BOTTOM_DP = 96;
+
     private GoogleMap mMap;
     //private LocationManager mLocationManager;
 
@@ -35,8 +43,8 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         //mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mDestinationText = (TextView) findViewById(R.id.textView_destination);
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
-        mDestinationLatitude = 0;
-        mDestinationLongitude = 0;
+        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, 0.0);
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, 0.0);;
 
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,8 +52,8 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
                 Log.d(TAG, "Clicked on set destination");
 
                 Intent setDestinationIntent = new Intent(v.getContext(), MainActivity.class);
-                setDestinationIntent.putExtra("LATITUDE", mDestinationLatitude);
-                setDestinationIntent.putExtra("LONGITUDE", mDestinationLongitude);
+                setDestinationIntent.putExtra(EXTRA_KEY_LATITUDE, mDestinationLatitude);
+                setDestinationIntent.putExtra(EXTRA_KEY_LONGITUDE, mDestinationLongitude);
 
                 setResult(RESULT_OK, setDestinationIntent);
                 finish();
@@ -71,13 +79,14 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setPadding(0, 0, 0, (int)getPixelsFromDp(MAP_PADDING_BOTTOM_DP));
+
+        LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(initPosition));
 
         LatLng cameraCenter = mMap.getCameraPosition().target;
         mDestinationLatitude = cameraCenter.latitude;
         mDestinationLongitude = cameraCenter.longitude;
-
-        //final Marker centerMarker = mMap.addMarker(new MarkerOptions().position(cameraCenter).title("Camera Center"));
-
         mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -87,7 +96,6 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
                 mDestinationLatitude = cameraCenter.latitude;
                 mDestinationLongitude = cameraCenter.longitude;
 
-                //centerMarker.setPosition(new LatLng(latitude, longitude));
                 mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);
             }
         });
@@ -162,5 +170,11 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         } else {
             mDestinationText.setText("Unknown");
         }*/
+    }
+
+    private double getPixelsFromDp(int dp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+        return dp * ((double)metrics.densityDpi/ DisplayMetrics.DENSITY_DEFAULT);
     }
 }
