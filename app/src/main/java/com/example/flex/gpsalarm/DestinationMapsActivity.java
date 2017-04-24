@@ -54,6 +54,8 @@ public class DestinationMapsActivity extends FragmentActivity
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
     private final String EXTRA_KEY_ADDRESS = "ADDRESS";
+    private final double DEFAULT_LATITUDE = 0.0;
+    private final double DEFAULT_LONGITUDE = 0.0;
     private final int MAP_PADDING_BOTTOM_DP = 96;
 
     private GoogleMap mMap;
@@ -78,16 +80,6 @@ public class DestinationMapsActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination_maps);
 
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-
-
         mUiHandler = new Handler(Looper.getMainLooper());
         mResultReceiver = new AddressResultReceiver(mUiHandler);
 
@@ -95,8 +87,8 @@ public class DestinationMapsActivity extends FragmentActivity
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
         mSetDestinationButton.setEnabled(false);
 
-        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
-        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);
+/*        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);*/
 
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,12 +113,16 @@ public class DestinationMapsActivity extends FragmentActivity
 
     @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
+        if(mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
         super.onStart();
     }
 
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+        if(mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
         super.onStop();
     }
 
@@ -145,8 +141,13 @@ public class DestinationMapsActivity extends FragmentActivity
         mMap.setPadding(0, 0, 0, (int) getPixelsFromDp(MAP_PADDING_BOTTOM_DP));
         enableMyLocation(mMap);
 
-        LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
+        buildGoogleApiClient();
+
+/*        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);*/
+
+/*        LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));*/
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -190,8 +191,11 @@ public class DestinationMapsActivity extends FragmentActivity
             mLastLocationLatitude = mLastLocation.getLatitude();
             mLastLocationLongitude = mLastLocation.getLongitude();
 
-            //LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
-            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
+            mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
+            mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);
+            
+            LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
         }
     }
 
@@ -232,5 +236,18 @@ public class DestinationMapsActivity extends FragmentActivity
         intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
         intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mDestinationLocation);
         startService(intent);
+    }
+
+    private synchronized void buildGoogleApiClient() {
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+
+            mGoogleApiClient.connect();
+        }
     }
 }
