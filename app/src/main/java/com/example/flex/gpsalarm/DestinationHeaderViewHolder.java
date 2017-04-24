@@ -27,22 +27,20 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
  * Created by Flex on 4/15/2017.
  */
 
-public class DestinationViewHolder extends ParentViewHolder {
-    private static final String TAG = "DestinationViewHolder";
+public class DestinationHeaderViewHolder extends ParentViewHolder {
+    private static final String TAG = "DestinationHeaderViewHolder";
 
     private final float INITIAL_POSITION = 0.0f;
     private final float ROTATED_POSITION = 180f;
     private final boolean HONEYCOMB_AND_ABOVE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private final float PIVOT_VALUE = 0.5f;
     private final long DEFAULT_ROTATE_DURATION_MS = 200;
-    private final int PADDING_DP = 8;
-
 
     public TextView mDestinationText;
     public SwitchCompat mDestinationSwitch;
     public ImageView mExpandImage;
 
-    public DestinationViewHolder(final View view, final DestinationAdapter.DestinationItemListener listener) {
+    public DestinationHeaderViewHolder(final View view, final DestinationAdapter.DestinationItemListener listener) {
         super(view);
 
         mDestinationText = (TextView) view.findViewById(R.id.TextView_savedDestination);
@@ -71,7 +69,6 @@ public class DestinationViewHolder extends ParentViewHolder {
                     //view.setSelected(false);
                 }
                 else {
-                    listener.onExpandToggled(getParentAdapterPosition());
                     expandView();
                     //view.setSelected(true);
 

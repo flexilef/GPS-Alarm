@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
+import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,13 +60,30 @@ public class MainActivity extends AppCompatActivity implements
         mOptions.add(new DestinationOptions("Label 1"));
 
         restoreDestinations();
-        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
         mAdapter = new DestinationAdapter(this, mDestinations);
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView_DestinationsList);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        //button code
+        //adapter listeners
+        mAdapter.setExpandCollapseListener(new ExpandableRecyclerAdapter.ExpandCollapseListener() {
+            @Override
+            public void onParentExpanded(int parentPosition) {
+                mAdapter.collapseAllParents();
+                mAdapter.expandParent(parentPosition);
+
+                //to make last destination option visible and scrolled when parent item is expanded
+                mLayoutManager.scrollToPositionWithOffset(parentPosition, 0);
+            }
+
+            @Override
+            public void onParentCollapsed(int parentPosition) {
+
+            }
+        });
+
+        //button listeners
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.FloatingActionButton_AddDestination);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -200,19 +218,6 @@ public class MainActivity extends AppCompatActivity implements
         // The code below is unecessary anyways since switch listener
         // updates the UI so there isn't a need to notify the adapter to update UI
         // mAdapter.notifyParentChanged(position);
-    }
-
-    @Override
-    public void onExpandToggled(int position) {
-        mAdapter.collapseAllParents();
-
-        //to make last destination option visible and scrolled when parent item is expanded
-        mLayoutManager.scrollToPositionWithOffset(position, 0);
-
-
-/*        TODO: Fix bug where selected should scroll to top
-        Log.d(TAG, "Expand Position:" + position);
-        mLayoutManager.scrollToPositionWithOffset(position, 0);*/
     }
 
     /* Helpers */

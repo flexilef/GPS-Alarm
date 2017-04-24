@@ -76,6 +76,7 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
 
         mDestinationText = (TextView) findViewById(R.id.textView_destination);
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
+        mSetDestinationButton.setEnabled(false);
 
         mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
         mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
