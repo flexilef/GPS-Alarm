@@ -7,6 +7,8 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -17,13 +19,17 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.flex.gpsalarm.Services.FetchAddressIntentService;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
-public class DestinationMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class DestinationMapsActivity extends FragmentActivity
+        implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     public class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver(Handler handler) {
@@ -31,14 +37,13 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         }
 
         @Override
-        protected  void onReceiveResult(int resultCode, Bundle resultData) {
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
             mDestinationAddress = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
             mDestinationText.setText(mDestinationAddress);
 
-            if(resultCode == FetchAddressIntentService.Constants.FAILURE_RESULT) {
+            if (resultCode == FetchAddressIntentService.Constants.FAILURE_RESULT) {
                 mSetDestinationButton.setEnabled(false);
-            }
-            else {
+            } else {
                 mSetDestinationButton.setEnabled(true);
             }
         }
@@ -49,20 +54,22 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
     private final String EXTRA_KEY_ADDRESS = "ADDRESS";
-    private final double DEFAULT_LATITUDE = 0.0;
-    private final double DEFAULT_LONGITUDE = 0.0;
     private final int MAP_PADDING_BOTTOM_DP = 96;
 
     private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
     private Button mSetDestinationButton;
     private TextView mDestinationText;
 
     private double mDestinationLatitude;
     private double mDestinationLongitude;
+    private double mLastLocationLatitude;
+    private double mLastLocationLongitude;
     private String mDestinationAddress;
 
     //service variables
     private AddressResultReceiver mResultReceiver;
+    private Location mLastLocation;
     private Location mDestinationLocation;
     private Handler mUiHandler;
 
@@ -71,6 +78,16 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination_maps);
 
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+
         mUiHandler = new Handler(Looper.getMainLooper());
         mResultReceiver = new AddressResultReceiver(mUiHandler);
 
@@ -78,8 +95,8 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
         mSetDestinationButton.setEnabled(false);
 
-        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
-        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
+        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);
 
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,6 +119,16 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
         mapFragment.getMapAsync(this);
     }
 
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
 
     /**
      * Manipulates the map once available.
@@ -115,16 +142,11 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setPadding(0, 0, 0, (int)getPixelsFromDp(MAP_PADDING_BOTTOM_DP));
+        mMap.setPadding(0, 0, 0, (int) getPixelsFromDp(MAP_PADDING_BOTTOM_DP));
         enableMyLocation(mMap);
 
         LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(initPosition));
-
-/*        LatLng cameraCenter = mMap.getCameraPosition().target;
-        mDestinationLatitude = cameraCenter.latitude;
-        mDestinationLongitude = cameraCenter.longitude;
-        mDestinationText.setText(mDestinationLatitude + ", " + mDestinationLongitude);*/
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -147,6 +169,40 @@ public class DestinationMapsActivity extends FragmentActivity implements OnMapRe
                 startFetchAddressIntentService();
             }
         });
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+            mLastLocationLatitude = mLastLocation.getLatitude();
+            mLastLocationLongitude = mLastLocation.getLongitude();
+
+            //LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     private double getPixelsFromDp(int dp) {
