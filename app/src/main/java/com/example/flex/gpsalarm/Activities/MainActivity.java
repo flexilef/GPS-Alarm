@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity
     private static String TAG = "MainActivity";
 
     private final String SHARED_PREFS_DESTINATIONS_KEY = "com.example.flex.gpsalarm.DESTINATIONS";
+    private final String SHARED_PREFS_GEOFENCES_KEY = "com.example.flex.gpsalarm.GEOFENCES";
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
 
@@ -70,12 +71,12 @@ public class MainActivity extends AppCompatActivity
     private PendingIntent mGeofencePendingIntent;
     private GoogleApiClient mGoogleApiClient;
 
-    private Map<Integer, Geofence> mRecyclerPositionToGeofence;
+    private Map<String, Geofence> mRequestIdToGeofence;
+    private Map<Integer, String> mPositionToRequestId;
     private List<DestinationHeader> mDestinations;
     private List<DestinationOptions> mOptions;
 
     private int mEditDestinationIndex = -1;
-    private int mGeofenceCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity
         mGeofencePendingIntent = null;
         buildGoogleApiClient();
 
-        mRecyclerPositionToGeofence = new HashMap<>();
+        mRequestIdToGeofence = new HashMap<>();
         mOptions = new ArrayList<>();
         mDestinations = new ArrayList<>();
         mOptions.add(new DestinationOptions("Label 1"));
@@ -138,6 +139,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         storeDestinations();
+        storeGeofences();
         mGoogleApiClient.disconnect();
 
         super.onStop();
@@ -234,6 +236,14 @@ public class MainActivity extends AppCompatActivity
 
         final DestinationHeader destination = mDestinations.get(position);
 
+        List<String> geofenceIds = new ArrayList<>();
+        //taking advantage of position also being used as the geofence request ids
+        geofenceIds.add(String.valueOf(position));
+
+        LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient, geofenceIds)
+                .setResultCallback(this);
+        mRequestIdToGeofence.remove(position);
+
         mDestinations.remove(position);
         mAdapter.notifyParentRemoved(position);
 
@@ -251,18 +261,20 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSwitchClicked(int position, boolean isChecked) {
-        if(!mGoogleApiClient.isConnected()) {
+        if (!mGoogleApiClient.isConnected()) {
             return;
         }
 
         DestinationHeader destination = mDestinations.get(position);
         destination.setSwitchChecked(isChecked);
 
+        mGeofencePendingIntent = getGeofencePendingIntent();
+
         if (!isChecked) {
-            LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient, getGeofencePendingIntent())
+            LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient, mGeofencePendingIntent)
                     .setResultCallback(this);
 
-            mRecyclerPositionToGeofence.remove(position);
+            mRequestIdToGeofence.remove(position);
         }
 
         //add the geofence
@@ -271,7 +283,7 @@ public class MainActivity extends AppCompatActivity
             double longitude = destination.getLongitude();
             float radius = 100;
 
-            mRecyclerPositionToGeofence.put(position, new Geofence.Builder()
+            mRequestIdToGeofence.put(position, new Geofence.Builder()
                     .setRequestId("" + position)
                     .setCircularRegion(latitude, longitude, radius)
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
@@ -291,14 +303,14 @@ public class MainActivity extends AppCompatActivity
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
                     getGeofencingRequest(),
-                    getGeofencePendingIntent()
+                    mGeofencePendingIntent
             ).setResultCallback(this);
         }
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        restoreGeofences();
     }
 
     @Override
@@ -322,16 +334,18 @@ public class MainActivity extends AppCompatActivity
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
 
-        List<Geofence> geofences = new ArrayList<>(mRecyclerPositionToGeofence.values());
+        List<Geofence> geofences = new ArrayList<>(mRequestIdToGeofence.values());
         builder.addGeofences(geofences);
 
         return builder.build();
     }
 
     private PendingIntent getGeofencePendingIntent() {
-        if(mGeofencePendingIntent != null) {
+        if (mGeofencePendingIntent != null) {
+            Log.d(TAG, "pending intent is NOT null");
             return mGeofencePendingIntent;
         }
+        Log.d(TAG, "pending intent is null");
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
 
@@ -374,6 +388,19 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "store destination:" + destinationListJson);
     }
 
+    private void storeGeofences() {
+        String geofenceListJson = new Gson().toJson(mRequestIdToGeofence);
+
+        SharedPreferences sharedPrefs = getSharedPreferences(SHARED_PREFS_GEOFENCES_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+
+        editor.putString(SHARED_PREFS_DESTINATIONS_KEY, geofenceListJson);
+
+        editor.apply();
+
+        Log.d(TAG, "store geofences:" + geofenceListJson);
+    }
+
     //update mDestinations with any saved destinations
     private void restoreDestinations() {
         SharedPreferences sharedPrefs = getSharedPreferences(SHARED_PREFS_DESTINATIONS_KEY, Context.MODE_PRIVATE);
@@ -383,8 +410,37 @@ public class MainActivity extends AppCompatActivity
 
         }.getType());
 
-        if(destinations != null) {
+        if (destinations != null) {
             mDestinations = destinations;
+        }
+    }
+
+    private void restoreGeofences() {
+        SharedPreferences sharedPrefs = getSharedPreferences(SHARED_PREFS_GEOFENCES_KEY, Context.MODE_PRIVATE);
+        String geofenceListJson = sharedPrefs.getString(SHARED_PREFS_GEOFENCES_KEY, "");
+
+        Map<Integer, Geofence> geofences = new Gson().fromJson(geofenceListJson, new TypeToken<Map<Integer, Geofence>>() {
+
+        }.getType());
+
+        if (geofences != null) {
+            mRequestIdToGeofence = geofences;
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(),
+                    mGeofencePendingIntent
+            ).setResultCallback(this);
         }
     }
 }
