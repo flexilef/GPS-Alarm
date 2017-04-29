@@ -114,6 +114,7 @@ public class DestinationMapsActivity extends FragmentActivity
 
     @Override
     protected void onStart() {
+        //TODO: Bug opposite
         if(mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
