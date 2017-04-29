@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity
         final DestinationHeader destination = mDestinations.get(position);
         String requestId = destination.getId();
         removeGeofence(requestId);
-        
+
         mDestinations.remove(position);
         mAdapter.notifyParentRemoved(position);
 
@@ -262,6 +262,13 @@ public class MainActivity extends AppCompatActivity
                 mDestinations.add(position, destination);
                 mAdapter.notifyParentInserted(position);
                 mRecyclerView.scrollToPosition(position);
+
+                String requestId = destination.getId();
+                double latitude = destination.getLatitude();
+                double longitude = destination.getLongitude();
+                float radius = 100;
+
+                addGeofence(requestId, latitude, longitude, radius);
             }
         };
         displayUndoDeleteSnackbar(listener);
@@ -288,29 +295,7 @@ public class MainActivity extends AppCompatActivity
             double longitude = destination.getLongitude();
             float radius = 100;
 
-            mRequestIdToGeofence.put(requestId, new Geofence.Builder()
-                    .setRequestId(requestId)
-                    .setCircularRegion(latitude, longitude, radius)
-                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build());
-
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            PendingIntent mGeofencePendingIntent = getGeofencePendingIntent();
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    getGeofencingRequest(),
-                    mGeofencePendingIntent
-            ).setResultCallback(this);
+            addGeofence(destination.getId(), latitude, longitude, radius);
         }
     }
 
@@ -342,6 +327,32 @@ public class MainActivity extends AppCompatActivity
     }
 
     /* Helpers */
+
+    private void addGeofence(String requestId, double latitude, double longitude, float radius) {
+        mRequestIdToGeofence.put(requestId, new Geofence.Builder()
+                .setRequestId(requestId)
+                .setCircularRegion(latitude, longitude, radius)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build());
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        PendingIntent mGeofencePendingIntent = getGeofencePendingIntent();
+        LocationServices.GeofencingApi.addGeofences(
+                mGoogleApiClient,
+                getGeofencingRequest(),
+                mGeofencePendingIntent
+        ).setResultCallback(this);
+    }
 
     private void removeGeofence(String requestId) {
         List<String> geofenceIds = new ArrayList<>();
