@@ -1,4 +1,4 @@
-package com.example.flex.gpsalarm;
+package com.example.flex.gpsalarm.Activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.flex.gpsalarm.R;
 import com.example.flex.gpsalarm.Services.FetchAddressIntentService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -193,7 +194,7 @@ public class DestinationMapsActivity extends FragmentActivity
 
             mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
             mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);
-            
+
             LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
         }
@@ -201,12 +202,12 @@ public class DestinationMapsActivity extends FragmentActivity
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        //TODO: check that switching orientation will call this or not
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        //TODO: check that switching orientation will call this or not
     }
 
     private double getPixelsFromDp(int dp) {

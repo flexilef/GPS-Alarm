@@ -23,7 +23,7 @@ public class DestinationAdapter
     private LayoutInflater mInflater;
     private DestinationItemListener mListener;
 
-    interface DestinationItemListener {
+    public interface DestinationItemListener {
         void onDestinationClicked(int position);
         void onDeleteClicked(int position);
         void onSwitchClicked(int position, boolean switchValue);

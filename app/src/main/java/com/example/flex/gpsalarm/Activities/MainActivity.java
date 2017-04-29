@@ -1,14 +1,19 @@
-package com.example.flex.gpsalarm;
+package com.example.flex.gpsalarm.Activities;
 
+import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,45 +21,74 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
+import com.example.flex.gpsalarm.DestinationAdapter;
+import com.example.flex.gpsalarm.DestinationHeader;
+import com.example.flex.gpsalarm.DestinationOptions;
+import com.example.flex.gpsalarm.R;
+import com.example.flex.gpsalarm.Services.GeofenceTransitionsIntentService;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements
-    DestinationAdapter.DestinationItemListener {
+public class MainActivity extends AppCompatActivity
+        implements DestinationAdapter.DestinationItemListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
     private static String TAG = "MainActivity";
 
-    private final String EXTRA_KEY_LATITUDE = "LATITUDE";
-    private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
-    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
     private final String SHARED_PREFS_DESTINATIONS_KEY = "com.example.flex.gpsalarm.DESTINATIONS";
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
+
+    //intent codes
     private final int PICK_DESTINATION_CODE = 1;
     private final int EDIT_DESTINATION_CODE = 2;
+    private final int START_GEOFENCE_CODE = 3;
+
+    //intent extras
+    private final String EXTRA_KEY_LATITUDE = "LATITUDE";
+    private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
+    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
+    private PendingIntent mGeofencePendingIntent;
+    private GoogleApiClient mGoogleApiClient;
 
+    private Map<Integer, Geofence> mRecyclerPositionToGeofence;
     private List<DestinationHeader> mDestinations;
     private List<DestinationOptions> mOptions;
+
     private int mEditDestinationIndex = -1;
+    private int mGeofenceCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mGeofencePendingIntent = null;
+        buildGoogleApiClient();
+
+        mRecyclerPositionToGeofence = new HashMap<>();
         mOptions = new ArrayList<>();
         mDestinations = new ArrayList<>();
         mOptions.add(new DestinationOptions("Label 1"));
@@ -96,9 +130,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
     protected void onStop() {
-        super.onStop();
         storeDestinations();
+        mGoogleApiClient.disconnect();
+
+        super.onStop();
     }
 
     @Override
@@ -141,23 +183,22 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             double latitude, longitude;
             String address = data.getStringExtra(EXTRA_KEY_ADDRESS);
             latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
             longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
 
-            if(requestCode == PICK_DESTINATION_CODE) {
+            if (requestCode == PICK_DESTINATION_CODE) {
                 DestinationHeader destination = new DestinationHeader(address, false, mOptions);
                 destination.setLatitude(latitude);
                 destination.setLongitude(longitude);
 
                 mDestinations.add(destination);
 
-                mAdapter.notifyParentInserted(mDestinations.size()-1);
-                mRecyclerView.scrollToPosition(mDestinations.size()-1);
-            }
-            else if(requestCode == EDIT_DESTINATION_CODE && mEditDestinationIndex >= 0) {
+                mAdapter.notifyParentInserted(mDestinations.size() - 1);
+                mRecyclerView.scrollToPosition(mDestinations.size() - 1);
+            } else if (requestCode == EDIT_DESTINATION_CODE && mEditDestinationIndex >= 0) {
                 DestinationHeader destination = new DestinationHeader(address, false, mOptions);
                 destination.setLatitude(latitude);
                 destination.setLongitude(longitude);
@@ -210,17 +251,105 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onSwitchClicked(int position, boolean isChecked) {
-        //TODO: start a service to check for alarm going off
-        mDestinations.get(position).setSwitchChecked(isChecked);
-        // Uncommenting the code below will cause a crash because of
-        // circular code involving the switch listener in view holder and
-        // the onBind function in adapter
-        // The code below is unecessary anyways since switch listener
-        // updates the UI so there isn't a need to notify the adapter to update UI
-        // mAdapter.notifyParentChanged(position);
+        if(!mGoogleApiClient.isConnected()) {
+            return;
+        }
+
+        DestinationHeader destination = mDestinations.get(position);
+        destination.setSwitchChecked(isChecked);
+
+        if (!isChecked) {
+            LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient, getGeofencePendingIntent())
+                    .setResultCallback(this);
+
+            mRecyclerPositionToGeofence.remove(position);
+        }
+
+        //add the geofence
+        if (isChecked) {
+            double latitude = destination.getLatitude();
+            double longitude = destination.getLongitude();
+            float radius = 100;
+
+            mRecyclerPositionToGeofence.put(position, new Geofence.Builder()
+                    .setRequestId("" + position)
+                    .setCircularRegion(latitude, longitude, radius)
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build());
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(),
+                    getGeofencePendingIntent()
+            ).setResultCallback(this);
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onResult(@NonNull Status status) {
+
     }
 
     /* Helpers */
+
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+
+        List<Geofence> geofences = new ArrayList<>(mRecyclerPositionToGeofence.values());
+        builder.addGeofences(geofences);
+
+        return builder.build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        if(mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private synchronized void buildGoogleApiClient() {
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+
+            mGoogleApiClient.connect();
+        }
+    }
 
     private void displayUndoDeleteSnackbar(View.OnClickListener listener) {
         CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.coordinatorlayout_main);
