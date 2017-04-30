@@ -270,7 +270,9 @@ public class MainActivity extends AppCompatActivity
                 double longitude = destination.getLongitude();
                 float radius = 100;
 
-                addGeofence(requestId, latitude, longitude, radius);
+                if(destination.isSwitchChecked()) {
+                    addGeofence(requestId, latitude, longitude, radius);
+                }
             }
         };
         displayUndoDeleteSnackbar(listener);
