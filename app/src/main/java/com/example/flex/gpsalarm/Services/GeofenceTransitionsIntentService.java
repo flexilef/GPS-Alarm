@@ -15,10 +15,13 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.example.flex.gpsalarm.Activities.MainActivity;
+import com.example.flex.gpsalarm.DestinationHeader;
 import com.example.flex.gpsalarm.R;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +42,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     private final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 5000;
     private final int NOTIFICATION_ID = 1;
     private final int RELAUNCH_ACTIVITY_CODE = 0;
-    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
+    private final String EXTRA_KEY_DESTINATIONS = "DESTINATIONS";
 
     public GeofenceTransitionsIntentService() {
         super("GeofenceTransition");
@@ -58,7 +61,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
             return;
         }
 
-        String address = intent.getStringExtra(EXTRA_KEY_ADDRESS);
+        String destinationListJson = intent.getStringExtra(EXTRA_KEY_DESTINATIONS);
+        List<DestinationHeader> destinations = new Gson().fromJson(destinationListJson, new TypeToken<List<DestinationHeader>>() {
+
+        }.getType());
+
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
         if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
@@ -71,6 +78,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                     Log.d(TAG, TAG + ": Entering " + id);
 
+                    String address = getDestinationAddressFromId(id, destinations);
                     sendNotification(address);
                 }
                 else if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -101,5 +109,15 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
+
+    private String getDestinationAddressFromId(String requestId, List<DestinationHeader> destinations) {
+        for(DestinationHeader destination : destinations) {
+            if(destination.getId().equals(requestId)) {
+                return destination.getDestinationAddress();
+            }
+        }
+
+        return "";
     }
 }

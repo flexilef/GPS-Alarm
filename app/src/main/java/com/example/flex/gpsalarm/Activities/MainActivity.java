@@ -65,11 +65,13 @@ public class MainActivity extends AppCompatActivity
     private final String EXTRA_KEY_LATITUDE = "LATITUDE";
     private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
     private final String EXTRA_KEY_ADDRESS = "ADDRESS";
+    private final String EXTRA_KEY_DESTINATIONS = "DESTINATIONS";
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     private GoogleApiClient mGoogleApiClient;
+    private PendingIntent mGeofencePendingIntent;
 
     private Map<String, Geofence> mRequestIdToGeofence;
     private List<DestinationHeader> mDestinations;
@@ -87,6 +89,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         buildGoogleApiClient();
 
+        mGeofencePendingIntent = null;
         mGeofencesToDelete = new ArrayList<>();
         mRequestIdToGeofence = new HashMap<>();
         mOptions = new ArrayList<>();
@@ -345,11 +348,11 @@ public class MainActivity extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        PendingIntent geofencePendingIntent = getGeofencePendingIntent(requestId);
+        PendingIntent mGeofencePendingIntent = getGeofencePendingIntent(requestId);
         LocationServices.GeofencingApi.addGeofences(
                 mGoogleApiClient,
                 getGeofencingRequest(),
-                geofencePendingIntent
+                mGeofencePendingIntent
         ).setResultCallback(this);
     }
 
@@ -374,10 +377,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private PendingIntent getGeofencePendingIntent(String requestId) {
-        String address = getDestinationFromId(requestId).getDestinationAddress();
+        if(mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        intent.putExtra(EXTRA_KEY_ADDRESS, address);
+        intent.putExtra(EXTRA_KEY_DESTINATIONS, new Gson().toJson(mDestinations));
 
         return PendingIntent.getService(this, PENDING_INTENT_SENDER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
@@ -402,16 +407,6 @@ public class MainActivity extends AppCompatActivity
                 .setAction("Undo", listener);
 
         snackbar.show();
-    }
-
-    private DestinationHeader getDestinationFromId(String requestId) {
-        for(DestinationHeader destination : mDestinations) {
-            if(destination.getId().equals(requestId)) {
-                return destination;
-            }
-        }
-
-        return null;
     }
 
     //save the current list of destinations into shared preferences
