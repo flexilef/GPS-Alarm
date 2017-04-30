@@ -1,10 +1,21 @@
 package com.example.flex.gpsalarm.Services;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.example.flex.gpsalarm.Activities.MainActivity;
+import com.example.flex.gpsalarm.R;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
@@ -26,6 +37,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
     private final double DEFAULT_LONGITUDE = 0.0;
     private final float GEOFENCE_RADIUS_IN_METERS = 100;
     private final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 5000;
+    private final int NOTIFICATION_ID = 1;
+    private final int RELAUNCH_ACTIVITY_CODE = 0;
+    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
 
     public GeofenceTransitionsIntentService() {
         super("GeofenceTransition");
@@ -41,8 +55,10 @@ public class GeofenceTransitionsIntentService extends IntentService {
             int errorCode = geofencingEvent.getErrorCode();
 
             Log.d(TAG, TAG + ": " + errorCode);
+            return;
         }
 
+        String address = intent.getStringExtra(EXTRA_KEY_ADDRESS);
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
         if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
@@ -54,11 +70,36 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
                 if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                     Log.d(TAG, TAG + ": Entering " + id);
+
+                    sendNotification(address);
                 }
                 else if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                     Log.d(TAG, TAG + ": Exiting " + id);
                 }
             }
         }
+    }
+
+    private void sendNotification(String address) {
+        Intent mainIntent = new Intent(this, MainActivity.class);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(mainIntent);
+
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(RELAUNCH_ACTIVITY_CODE, PendingIntent.FLAG_UPDATE_CURRENT);
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.alarm_clock_50)
+                .setColor(Color.BLUE)
+                .setAutoCancel(true)
+                .setSound(alarmSound)
+                .setContentTitle("Destination Reached!")
+                .setContentText(address)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 }

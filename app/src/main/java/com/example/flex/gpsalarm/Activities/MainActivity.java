@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity
     private final String SHARED_PREFS_REQUEST_IDS_KEY = "com.example.flex.gpsalarm.REQUESTIDS";
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
+    private final int PENDING_INTENT_SENDER = 0;
 
     //intent codes
     private final int PICK_DESTINATION_CODE = 1;
@@ -68,7 +69,6 @@ public class MainActivity extends AppCompatActivity
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
-    private PendingIntent mGeofencePendingIntent;
     private GoogleApiClient mGoogleApiClient;
 
     private Map<String, Geofence> mRequestIdToGeofence;
@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         buildGoogleApiClient();
 
-        mGeofencePendingIntent = null;
         mGeofencesToDelete = new ArrayList<>();
         mRequestIdToGeofence = new HashMap<>();
         mOptions = new ArrayList<>();
@@ -346,11 +345,11 @@ public class MainActivity extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        PendingIntent mGeofencePendingIntent = getGeofencePendingIntent();
+        PendingIntent geofencePendingIntent = getGeofencePendingIntent(requestId);
         LocationServices.GeofencingApi.addGeofences(
                 mGoogleApiClient,
                 getGeofencingRequest(),
-                mGeofencePendingIntent
+                geofencePendingIntent
         ).setResultCallback(this);
     }
 
@@ -374,16 +373,13 @@ public class MainActivity extends AppCompatActivity
         return builder.build();
     }
 
-    private PendingIntent getGeofencePendingIntent() {
-        if (mGeofencePendingIntent != null) {
-            Log.d(TAG, "pending intent is NOT null");
-            return mGeofencePendingIntent;
-        }
-        Log.d(TAG, "pending intent is null");
+    private PendingIntent getGeofencePendingIntent(String requestId) {
+        String address = getDestinationFromId(requestId).getDestinationAddress();
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        intent.putExtra(EXTRA_KEY_ADDRESS, address);
 
-        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(this, PENDING_INTENT_SENDER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private synchronized void buildGoogleApiClient() {
@@ -406,6 +402,16 @@ public class MainActivity extends AppCompatActivity
                 .setAction("Undo", listener);
 
         snackbar.show();
+    }
+
+    private DestinationHeader getDestinationFromId(String requestId) {
+        for(DestinationHeader destination : mDestinations) {
+            if(destination.getId().equals(requestId)) {
+                return destination;
+            }
+        }
+
+        return null;
     }
 
     //save the current list of destinations into shared preferences
