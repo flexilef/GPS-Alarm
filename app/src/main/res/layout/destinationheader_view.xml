@@ -25,10 +25,8 @@
         android:layout_toLeftOf="@+id/switch_destination"
         android:layout_toStartOf="@+id/switch_destination"
         android:gravity="center_vertical"
-        android:text="TextView"
         android:textColor="@color/colorTextDisabled"
-        android:textSize="20sp"
-        tools:text="@string/test_destination" />
+        android:textSize="20sp" />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/switch_destination"
@@ -53,8 +51,9 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/switch_destination"
         android:layout_marginBottom="12dp"
-        android:contentDescription="Arrow Down Image"
+        android:contentDescription="@string/content_desc_expand"
         android:padding="12dp"
+        android:tint="@color/colorPrimary"
         app:srcCompat="@drawable/expand_arrow_48" />
 
     <View
@@ -63,7 +62,7 @@
         android:layout_height="1dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@color/colorTextDisabled"
+        android:background="@color/colorPrimary"
         android:visibility="visible" />
 
 

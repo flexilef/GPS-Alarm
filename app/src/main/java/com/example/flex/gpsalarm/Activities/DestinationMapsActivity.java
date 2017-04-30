@@ -10,6 +10,7 @@ import android.os.ResultReceiver;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -51,7 +52,7 @@ public class DestinationMapsActivity extends FragmentActivity implements
 
     private static String LOG_TAG = DestinationMapsActivity.class.getSimpleName();
 
-    private final int MAP_PADDING_BOTTOM_DP = 96;
+    private final int MAP_PADDING_BOTTOM_DP = 120;
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
 

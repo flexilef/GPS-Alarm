@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorBackground"
     android:paddingBottom="12dp"
     android:paddingEnd="8dp"
     android:paddingLeft="8dp"
@@ -21,8 +21,10 @@
         android:layout_marginLeft="12dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
+        android:contentDescription="@string/content_desc_proximity"
         android:padding="4dp"
-        android:src="@drawable/geofence_64" />
+        android:src="@drawable/geofence_64"
+        android:tint="@color/colorTextDisabled" />
 
     <TextView
         android:id="@+id/textView_proximity"
@@ -34,7 +36,9 @@
         android:layout_toEndOf="@+id/imageView_proximity"
         android:layout_toRightOf="@+id/imageView_proximity"
         android:gravity="center_vertical"
-        android:text="Proximity"
+        android:hint="@string/text_hint_proximity"
+        android:textColor="@color/colorTextDisabled"
+        android:textColorHint="@color/colorTextDisabled"
         android:textSize="16sp" />
 
     <ImageView
@@ -45,8 +49,10 @@
         android:layout_marginLeft="12dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
+        android:contentDescription="@string/content_desc_label"
         android:padding="4dp"
-        android:src="@drawable/ic_label_white_48dp" />
+        android:src="@drawable/ic_label_white_48dp"
+        android:tint="@color/colorTextDisabled" />
 
     <TextView
         android:id="@+id/textView_label"
@@ -59,7 +65,9 @@
         android:layout_toEndOf="@+id/imageView_label"
         android:layout_toRightOf="@+id/imageView_label"
         android:gravity="center"
-        android:text="Label"
+        android:hint="@string/text_hint_label"
+        android:textColor="@color/colorTextDisabled"
+        android:textColorHint="@color/colorTextDisabled"
         android:textSize="16sp" />
 
     <View
@@ -70,7 +78,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="12dp"
-        android:background="@color/colorTextDisabled"
+        android:background="@color/colorPrimary"
         android:visibility="visible" />
 
     <ImageButton
@@ -83,10 +91,11 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
         android:background="@android:color/transparent"
-        android:contentDescription="Delete Button"
+        android:contentDescription="@string/content_desc_delete"
         android:padding="4dp"
         android:scaleType="fitCenter"
         android:src="@drawable/delete_48"
+        android:tint="@color/colorAccent"
         android:visibility="visible" />
 
     <TextView
@@ -100,7 +109,8 @@
         android:layout_toEndOf="@+id/imageButton_delete"
         android:layout_toRightOf="@+id/imageButton_delete"
         android:gravity="center_vertical"
-        android:text="Delete"
+        android:text="@string/text_delete"
+        android:textColor="@color/colorTextDisabled"
         android:textSize="16sp" />
 
 </RelativeLayout>

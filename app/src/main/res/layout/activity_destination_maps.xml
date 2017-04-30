@@ -6,7 +6,6 @@
     android:layout_height="wrap_content">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -24,51 +23,46 @@
         android:layout_above="@+id/button_setDestination"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@color/colorPrimaryDark"
+        android:layout_marginEnd="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/rounded_corner"
         android:ellipsize="end"
         android:gravity="center"
-        android:singleLine="true"
+        android:maxLines="1"
         android:textAlignment="center"
-        android:textColor="@color/colorTextNormal"
+        android:textColor="@color/colorTextContrast"
         android:textSize="24sp" />
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/button_setDestination"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:backgroundTint="@color/colorAccent"
-        android:text="Set Destination"
-        android:textAlignment="center" />
+        android:layout_marginEnd="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginStart="12dp"
+        android:text="@string/button_destination"
+        android:textAlignment="center"
+        app:backgroundTint="@color/colorAccent" />
 
+    <!--
+        layout_marginBottom = 24dp because image height is 48dp, and we want to center it
+    -->
     <ImageView
-        android:id="@+id/imageView_cameraLocation"
+        android:id="@+id/imageView_marker"
         android:layout_width="48dp"
         android:layout_height="match_parent"
         android:layout_above="@+id/textView_destination"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="24dp"
-        android:contentDescription="Camera Position Marker"
+        android:contentDescription="@string/content_desc_marker"
         android:src="@drawable/marker_96"
+        android:tint="@color/colorPrimary"
         android:visibility="visible" />
-
-    <ImageButton
-        android:id="@+id/imageButton_myLocation"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_above="@+id/textView_destination"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
-        android:adjustViewBounds="false"
-        android:background="@android:color/transparent"
-        android:contentDescription="My Location Button"
-        android:cropToPadding="false"
-        android:src="@android:drawable/ic_menu_mylocation"
-        android:tint="@color/colorAccent"
-        android:visibility="gone" />
 
 </RelativeLayout>

@@ -93,10 +93,10 @@ public class DestinationHeaderViewHolder extends ParentViewHolder {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    mDestinationText.setTextColor(Color.rgb(255,255,255));
+                    mDestinationText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.colorTextNormal));
                 }
                 else {
-                    mDestinationText.setTextColor(Color.rgb(204,204,204));
+                    mDestinationText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.colorTextDisabled));
                 }
 
                 listener.onSwitchClicked(getParentAdapterPosition(), isChecked);
