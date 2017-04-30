@@ -10,23 +10,30 @@ import java.util.UUID;
  */
 
 public class DestinationHeader implements Parent<DestinationOptions> {
-    private List<DestinationOptions> mOptions;
+
+    private final double DEFAULT_LATITUDE = 0.0;
+    private final double DEFAULT_LONGITUDE = 0.0;
+
+    private List<DestinationOptions> mDestinationOptions;
+
+    private String id;
     private String mDestinationAddress;
-    private boolean mIsSwitchChecked;
     private double mLatitude;
     private double mLongitude;
-    private String id;
+    private boolean mIsSwitchChecked;
 
     public DestinationHeader(String destinationAddress, boolean isChecked, List<DestinationOptions> options) {
-        mOptions = options;
+        id = UUID.randomUUID().toString();
+        mDestinationOptions = options;
         mDestinationAddress = destinationAddress;
         mIsSwitchChecked = isChecked;
-        id = UUID.randomUUID().toString();
+        mLatitude = DEFAULT_LATITUDE;
+        mLongitude = DEFAULT_LONGITUDE;
     }
 
     @Override
     public List<DestinationOptions> getChildList() {
-        return mOptions;
+        return mDestinationOptions;
     }
 
     @Override

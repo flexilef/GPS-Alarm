@@ -1,7 +1,6 @@
 package com.example.flex.gpsalarm.Services;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -19,12 +18,12 @@ import com.example.flex.gpsalarm.DestinationHeader;
 import com.example.flex.gpsalarm.R;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_DESTINATIONS;
 
 /**
  * Created by Flex on 4/27/2017.
@@ -32,17 +31,10 @@ import java.util.List;
 
 public class GeofenceTransitionsIntentService extends IntentService {
 
-    private final String TAG = "GeofenceTransitions";
+    private static final String LOG_TAG = GeofenceTransitionsIntentService.class.getSimpleName();
 
-    private final String EXTRA_KEY_LATITUDE = "LATITUDE";
-    private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
-    private final double DEFAULT_LATITUDE = 0.0;
-    private final double DEFAULT_LONGITUDE = 0.0;
-    private final float GEOFENCE_RADIUS_IN_METERS = 100;
-    private final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 5000;
     private final int NOTIFICATION_ID = 1;
     private final int RELAUNCH_ACTIVITY_CODE = 0;
-    private final String EXTRA_KEY_DESTINATIONS = "DESTINATIONS";
 
     public GeofenceTransitionsIntentService() {
         super("GeofenceTransition");
@@ -51,13 +43,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(TAG, TAG + ": Geo fence was called");
+        Log.d(LOG_TAG, LOG_TAG + ": Geo fence was called");
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if(geofencingEvent.hasError()) {
             int errorCode = geofencingEvent.getErrorCode();
 
-            Log.d(TAG, TAG + ": " + errorCode);
+            Log.d(LOG_TAG, LOG_TAG + ": " + errorCode);
             return;
         }
 
@@ -70,24 +62,28 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            List<Geofence> trigerringGeofences = geofencingEvent.getTriggeringGeofences();
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
-            for(Geofence geofence : trigerringGeofences) {
+            for(Geofence geofence : triggeringGeofences) {
                 String id = geofence.getRequestId();
 
                 if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    Log.d(TAG, TAG + ": Entering " + id);
+                    Log.d(LOG_TAG, LOG_TAG + ": Entering " + id);
 
                     String address = getDestinationAddressFromId(id, destinations);
                     sendNotification(address);
                 }
+                //TODO: remove, only keep for debugging
                 else if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                    Log.d(TAG, TAG + ": Exiting " + id);
+                    Log.d(LOG_TAG, LOG_TAG + ": Exiting " + id);
                 }
             }
         }
     }
 
+    /* Helpers */
+
+    //TODO: hardcoded strings should be put in xml
     private void sendNotification(String address) {
         Intent mainIntent = new Intent(this, MainActivity.class);
 
