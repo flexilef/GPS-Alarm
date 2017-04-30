@@ -6,10 +6,62 @@
     android:layout_height="wrap_content"
     android:background="@color/colorPrimaryDark">
 
+    <ImageView
+        android:id="@+id/imageView_proximity"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/geofence_64" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_toRightOf="@+id/imageView_proximity"
+        android:gravity="center_vertical"
+        android:text="TextView"
+        android:textSize="16dp" />
+
+    <ImageView
+        android:id="@+id/imageView_label"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_below="@+id/imageView_proximity"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_label_white_48dp" />
+
+    <TextView
+        android:id="@+id/textView_label"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_above="@+id/imageButton_delete"
+        android:layout_toEndOf="@+id/imageView_label"
+        android:layout_toRightOf="@+id/imageView_label"
+        android:gravity="center"
+        android:text="Label"
+        android:textSize="16dp" />
+
+    <View
+        android:id="@+id/view_divider_delete"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/imageView_label"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@color/colorTextDisabled"
+        android:visibility="visible" />
+
     <ImageButton
         android:id="@+id/imageButton_delete"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_alignParentBottom="false"
+        android:layout_below="@+id/view_divider_delete"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:background="@android:color/transparent"
@@ -18,6 +70,17 @@
         android:scaleType="fitCenter"
         android:src="@drawable/delete_48"
         android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/textView_delete"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_above="@+id/view_divider"
+        android:layout_toEndOf="@+id/imageButton_delete"
+        android:layout_toRightOf="@+id/imageButton_delete"
+        android:gravity="center_vertical"
+        android:text="Delete"
+        android:textSize="16dp" />
 
     <View
         android:id="@+id/view_divider"

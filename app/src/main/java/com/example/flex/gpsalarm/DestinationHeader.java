@@ -2,6 +2,7 @@ package com.example.flex.gpsalarm;
 
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,4 +61,16 @@ public class DestinationHeader implements Parent<DestinationOptions> {
     public void setLatitude(double latitude) { mLatitude = latitude; }
 
     public void setLongitude(double longitude) { mLongitude = longitude; }
+
+    public void setProximity(int proximity) {
+        if (mDestinationOptions != null && !mDestinationOptions.isEmpty()) {
+            mDestinationOptions.get(0).setProximity(proximity);
+        }
+    }
+
+    public void setLabel(String label) {
+        if(mDestinationOptions != null && !mDestinationOptions.isEmpty()) {
+            mDestinationOptions.get(0).setLabel(label);
+        }
+    }
 }

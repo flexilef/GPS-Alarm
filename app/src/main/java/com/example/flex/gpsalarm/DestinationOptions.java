@@ -5,9 +5,30 @@ package com.example.flex.gpsalarm;
  */
 
 public class DestinationOptions {
-    private String mLabel;
+    private static final String LOG_TAG = DestinationOptions.class.getSimpleName();
 
-    public DestinationOptions(String label) {
+    private String mLabel;
+    private int mProximity;
+
+    public DestinationOptions() {
+        mLabel = "";
+        mProximity = 100;
+    }
+
+    public DestinationOptions(String label, int proximity) {
+        mLabel = label;
+        mProximity = proximity;
+    }
+
+    public int getProximity() { return mProximity; }
+
+    public String getLabel() { return mLabel; }
+
+    public void setProximity(int proximity) {
+        mProximity = proximity;
+    }
+
+    public void setLabel(String label) {
         mLabel = label;
     }
 }

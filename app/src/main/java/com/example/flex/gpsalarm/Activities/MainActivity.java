@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements
         mRequestIdToGeofence = new HashMap<>();
         mDestinationOptions = new ArrayList<>();
         mDestinations = new ArrayList<>();
-        mDestinationOptions.add(new DestinationOptions("Label 1"));
+        mDestinationOptions.add(new DestinationOptions());
 
         //has to be called after mDestinations is instantiated in order to populate it
         restoreDestinations();
