@@ -16,18 +16,17 @@ import java.util.List;
  */
 
 public class DestinationAdapter
-        extends ExpandableRecyclerAdapter<DestinationHeader, DestinationOptions, DestinationViewHolder, DestinationOptionsViewHolder>
+        extends ExpandableRecyclerAdapter<DestinationHeader, DestinationOptions, DestinationHeaderViewHolder, DestinationOptionsViewHolder>
 {
     private final String TAG = "DestinationAdapter";
 
     private LayoutInflater mInflater;
     private DestinationItemListener mListener;
 
-    interface DestinationItemListener {
+    public interface DestinationItemListener {
         void onDestinationClicked(int position);
         void onDeleteClicked(int position);
         void onSwitchClicked(int position, boolean switchValue);
-        void onExpandToggled(int position);
     }
 
     public DestinationAdapter(Context context, @NonNull List<DestinationHeader> destinationList) {
@@ -39,10 +38,10 @@ public class DestinationAdapter
 
     // onCreate ...
     @Override
-    public DestinationViewHolder onCreateParentViewHolder(@NonNull ViewGroup parentViewGroup, int viewType) {
+    public DestinationHeaderViewHolder onCreateParentViewHolder(@NonNull ViewGroup parentViewGroup, int viewType) {
         View destinationView = mInflater.inflate(R.layout.destinationheader_view, parentViewGroup, false);
 
-        return new DestinationViewHolder(destinationView, mListener);
+        return new DestinationHeaderViewHolder(destinationView, mListener);
     }
 
     @Override
@@ -54,10 +53,10 @@ public class DestinationAdapter
 
     // onBind ...
     @Override
-    public void onBindParentViewHolder(@NonNull DestinationViewHolder destinationViewHolder, int parentPosition, @NonNull DestinationHeader destinationHeader) {
+    public void onBindParentViewHolder(@NonNull DestinationHeaderViewHolder destinationHeaderViewHolder, int parentPosition, @NonNull DestinationHeader destinationHeader) {
         Log.d(TAG, "Switched on: " + destinationHeader.isSwitchChecked());
         //TODO: see if you can pass in the child view holder or viewgroup so that you can modify it here
-        destinationViewHolder.bind(destinationHeader);
+        destinationHeaderViewHolder.bind(destinationHeader);
     }
 
     @Override

@@ -6,13 +6,11 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.example.flex.gpsalarm.DestinationMapsActivity;
 import com.example.flex.gpsalarm.R;
 
 import java.io.IOException;
@@ -35,7 +33,7 @@ public class FetchAddressIntentService extends IntentService {
         public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
     }
 
-    private static String TAG = "FetchAddressIntentServ";
+    private final String TAG = "FetchAddressIntentServ";
 
     private String mErrorMessage = "";
     private ResultReceiver mReceiver;
