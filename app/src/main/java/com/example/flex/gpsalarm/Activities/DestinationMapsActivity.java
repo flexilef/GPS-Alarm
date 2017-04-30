@@ -7,8 +7,6 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -20,17 +18,18 @@ import android.widget.TextView;
 
 import com.example.flex.gpsalarm.R;
 import com.example.flex.gpsalarm.Services.FetchAddressIntentService;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
-public class DestinationMapsActivity extends FragmentActivity
-        implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_ADDRESS;
+import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_LATITUDE;
+import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_LONGITUDE;
+
+public class DestinationMapsActivity extends FragmentActivity implements
+        OnMapReadyCallback {
 
     public class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver(Handler handler) {
@@ -50,36 +49,33 @@ public class DestinationMapsActivity extends FragmentActivity
         }
     }
 
-    private static String TAG = "DestinationMapsActivity";
+    private static String LOG_TAG = DestinationMapsActivity.class.getSimpleName();
 
-    private final String EXTRA_KEY_LATITUDE = "LATITUDE";
-    private final String EXTRA_KEY_LONGITUDE = "LONGITUDE";
-    private final String EXTRA_KEY_ADDRESS = "ADDRESS";
+    private final int MAP_PADDING_BOTTOM_DP = 96;
     private final double DEFAULT_LATITUDE = 0.0;
     private final double DEFAULT_LONGITUDE = 0.0;
-    private final int MAP_PADDING_BOTTOM_DP = 96;
 
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
     private Button mSetDestinationButton;
     private TextView mDestinationText;
 
     private double mDestinationLatitude;
     private double mDestinationLongitude;
-    private double mLastLocationLatitude;
-    private double mLastLocationLongitude;
     private String mDestinationAddress;
 
-    //service variables
-    private AddressResultReceiver mResultReceiver;
-    private Location mLastLocation;
     private Location mDestinationLocation;
     private Handler mUiHandler;
+    private AddressResultReceiver mResultReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination_maps);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         mUiHandler = new Handler(Looper.getMainLooper());
         mResultReceiver = new AddressResultReceiver(mUiHandler);
@@ -88,15 +84,13 @@ public class DestinationMapsActivity extends FragmentActivity
         mSetDestinationButton = (Button) findViewById(R.id.button_setDestination);
         mSetDestinationButton.setEnabled(false);
 
-/*        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
-        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);*/
-
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Clicked on set destination");
+                Log.d(LOG_TAG, "Clicked on set destination");
 
                 Intent setDestinationIntent = new Intent(v.getContext(), MainActivity.class);
+
                 setDestinationIntent.putExtra(EXTRA_KEY_LATITUDE, mDestinationLatitude);
                 setDestinationIntent.putExtra(EXTRA_KEY_LONGITUDE, mDestinationLongitude);
                 setDestinationIntent.putExtra(EXTRA_KEY_ADDRESS, mDestinationAddress);
@@ -105,27 +99,6 @@ public class DestinationMapsActivity extends FragmentActivity
                 finish();
             }
         });
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
-
-    @Override
-    protected void onStart() {
-        //TODO: Bug opposite
-        if(mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
-        super.onStart();
-    }
-
-    protected void onStop() {
-        if(mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
-        }
-        super.onStop();
     }
 
     /**
@@ -143,13 +116,11 @@ public class DestinationMapsActivity extends FragmentActivity
         mMap.setPadding(0, 0, 0, (int) getPixelsFromDp(MAP_PADDING_BOTTOM_DP));
         enableMyLocation(mMap);
 
-        buildGoogleApiClient();
+        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
+        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
 
-/*        mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
-        mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);*/
-
-/*        LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));*/
+        LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -174,42 +145,7 @@ public class DestinationMapsActivity extends FragmentActivity
         });
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            mLastLocationLatitude = mLastLocation.getLatitude();
-            mLastLocationLongitude = mLastLocation.getLongitude();
-
-            mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, mLastLocationLatitude);
-            mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, mLastLocationLongitude);
-
-            LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        //TODO: check that switching orientation will call this or not
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        //TODO: check that switching orientation will call this or not
-    }
+    /* Helpers */
 
     private double getPixelsFromDp(int dp) {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -237,19 +173,7 @@ public class DestinationMapsActivity extends FragmentActivity
 
         intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
         intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mDestinationLocation);
+
         startService(intent);
-    }
-
-    private synchronized void buildGoogleApiClient() {
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-
-            mGoogleApiClient.connect();
-        }
     }
 }

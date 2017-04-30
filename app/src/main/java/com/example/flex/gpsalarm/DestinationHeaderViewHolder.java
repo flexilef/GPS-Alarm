@@ -28,17 +28,17 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
  */
 
 public class DestinationHeaderViewHolder extends ParentViewHolder {
-    private static final String TAG = "DestinationHeaderViewHolder";
+    private static final String LOG_TAG = DestinationHeaderViewHolder.class.getSimpleName();
 
+    private final float PIVOT_VALUE = 0.5f;
     private final float INITIAL_POSITION = 0.0f;
     private final float ROTATED_POSITION = 180f;
-    private final boolean HONEYCOMB_AND_ABOVE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-    private final float PIVOT_VALUE = 0.5f;
     private final long DEFAULT_ROTATE_DURATION_MS = 200;
+    private final boolean HONEYCOMB_AND_ABOVE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
+    public ImageView mExpandImage;
     public TextView mDestinationText;
     public SwitchCompat mDestinationSwitch;
-    public ImageView mExpandImage;
 
     public DestinationHeaderViewHolder(final View view, final DestinationAdapter.DestinationItemListener listener) {
         super(view);

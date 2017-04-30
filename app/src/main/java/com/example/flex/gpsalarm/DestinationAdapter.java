@@ -18,16 +18,16 @@ import java.util.List;
 public class DestinationAdapter
         extends ExpandableRecyclerAdapter<DestinationHeader, DestinationOptions, DestinationHeaderViewHolder, DestinationOptionsViewHolder>
 {
-    private final String TAG = "DestinationAdapter";
-
-    private LayoutInflater mInflater;
-    private DestinationItemListener mListener;
-
     public interface DestinationItemListener {
         void onDestinationClicked(int position);
         void onDeleteClicked(int position);
         void onSwitchClicked(int position, boolean switchValue);
     }
+
+    private static final String LOG_TAG = DestinationAdapter.class.getSimpleName();
+
+    private LayoutInflater mInflater;
+    private DestinationItemListener mListener;
 
     public DestinationAdapter(Context context, @NonNull List<DestinationHeader> destinationList) {
         super(destinationList);
@@ -54,7 +54,7 @@ public class DestinationAdapter
     // onBind ...
     @Override
     public void onBindParentViewHolder(@NonNull DestinationHeaderViewHolder destinationHeaderViewHolder, int parentPosition, @NonNull DestinationHeader destinationHeader) {
-        Log.d(TAG, "Switched on: " + destinationHeader.isSwitchChecked());
+        Log.d(LOG_TAG, "Switched on: " + destinationHeader.isSwitchChecked());
         //TODO: see if you can pass in the child view holder or viewgroup so that you can modify it here
         destinationHeaderViewHolder.bind(destinationHeader);
     }

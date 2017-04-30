@@ -33,11 +33,12 @@ public class FetchAddressIntentService extends IntentService {
         public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
     }
 
-    private final String TAG = "FetchAddressIntentServ";
+    private final String LOG_TAG = FetchAddressIntentService.class.getSimpleName();
 
-    private String mErrorMessage = "";
     private ResultReceiver mReceiver;
     private Location mLocation;
+
+    private String mErrorMessage;
 
     public FetchAddressIntentService() {
         super("FetchAddress");
@@ -56,12 +57,12 @@ public class FetchAddressIntentService extends IntentService {
         }
         catch(IOException ioException) {
             mErrorMessage = getString(R.string.service_not_available);
-            Log.e(TAG, mErrorMessage, ioException);
+            Log.e(LOG_TAG, mErrorMessage, ioException);
         }
         catch (IllegalArgumentException illegalArgumentException) {
             // Catch invalid latitude or longitude values.
             mErrorMessage = getString(R.string.invalid_lat_long_used);
-            Log.e(TAG, mErrorMessage + ". " +
+            Log.e(LOG_TAG, mErrorMessage + ". " +
                     "Latitude = " + mLocation.getLatitude() +
                     ", Longitude = " + mLocation.getLongitude(), illegalArgumentException);
         }
@@ -70,7 +71,7 @@ public class FetchAddressIntentService extends IntentService {
         if (addresses == null || addresses.size() == 0) {
             if (mErrorMessage.isEmpty()) {
                 mErrorMessage = getString(R.string.no_address_found);
-                Log.e(TAG, mErrorMessage);
+                Log.e(LOG_TAG, mErrorMessage);
             }
 
             deliverResultToReceiver(Constants.FAILURE_RESULT, mErrorMessage);
@@ -79,12 +80,12 @@ public class FetchAddressIntentService extends IntentService {
             List<String> addressFragments = new ArrayList<String>();
 
             // Fetch the address lines using getAddressLine,
-            // join them, and send them to the thread.
+            // join them, and send them to the thread
             for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
 
-            Log.i(TAG, getString(R.string.address_found));
+            Log.i(LOG_TAG, getString(R.string.address_found));
             deliverResultToReceiver(Constants.SUCCESS_RESULT,
                     TextUtils.join(System.getProperty("line.separator"), addressFragments));
         }
