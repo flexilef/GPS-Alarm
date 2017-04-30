@@ -4,7 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryDark">
+    android:background="@color/colorPrimaryDark"
+    android:paddingBottom="12dp"
+    android:paddingEnd="8dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingStart="8dp">
 
     <ImageView
         android:id="@+id/imageView_proximity"
@@ -13,38 +18,49 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:padding="4dp"
         android:src="@drawable/geofence_64" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textView_proximity"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_toEndOf="@+id/imageView_proximity"
         android:layout_toRightOf="@+id/imageView_proximity"
         android:gravity="center_vertical"
-        android:text="TextView"
-        android:textSize="16dp" />
+        android:text="Proximity"
+        android:textSize="16sp" />
 
     <ImageView
         android:id="@+id/imageView_label"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_below="@+id/imageView_proximity"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:padding="4dp"
         android:src="@drawable/ic_label_white_48dp" />
 
     <TextView
         android:id="@+id/textView_label"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_above="@+id/imageButton_delete"
+        android:layout_below="@+id/textView_proximity"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
         android:layout_toEndOf="@+id/imageView_label"
         android:layout_toRightOf="@+id/imageView_label"
         android:gravity="center"
         android:text="Label"
-        android:textSize="16dp" />
+        android:textSize="16sp" />
 
     <View
         android:id="@+id/view_divider_delete"
@@ -53,6 +69,7 @@
         android:layout_below="@+id/imageView_label"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="12dp"
         android:background="@color/colorTextDisabled"
         android:visibility="visible" />
 
@@ -62,8 +79,9 @@
         android:layout_height="48dp"
         android:layout_alignParentBottom="false"
         android:layout_below="@+id/view_divider_delete"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
         android:background="@android:color/transparent"
         android:contentDescription="Delete Button"
         android:padding="4dp"
@@ -75,20 +93,14 @@
         android:id="@+id/textView_delete"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_above="@+id/view_divider"
+        android:layout_below="@+id/view_divider_delete"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
         android:layout_toEndOf="@+id/imageButton_delete"
         android:layout_toRightOf="@+id/imageButton_delete"
         android:gravity="center_vertical"
         android:text="Delete"
-        android:textSize="16dp" />
-
-    <View
-        android:id="@+id/view_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="false"
-        android:layout_below="@+id/imageButton_delete"
-        android:background="@color/colorTextDisabled"
-        android:visibility="invisible" />
+        android:textSize="16sp" />
 
 </RelativeLayout>
