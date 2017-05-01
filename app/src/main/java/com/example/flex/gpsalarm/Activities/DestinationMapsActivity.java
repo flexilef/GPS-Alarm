@@ -59,16 +59,16 @@ public class DestinationMapsActivity extends FragmentActivity implements
     }
 
     private static String LOG_TAG = DestinationMapsActivity.class.getSimpleName();
+    //Default San Francisco
+    public static final double DEFAULT_LATITUDE = 37.7749;
+    public static final double DEFAULT_LONGITUDE = -122.4194;
 
     private final int MAP_PADDING_BOTTOM_DP = 120;
-    private final double DEFAULT_LATITUDE = 0.0;
-    private final double DEFAULT_LONGITUDE = 0.0;
 
     private GoogleMap mMap;
     private Button mSetDestinationButton;
     private TextView mDestinationText;
     private CircleOptions mCircleOptions;
-    private List<Circle> mCircles;
 
     private double mDestinationLatitude;
     private double mDestinationLongitude;
@@ -88,8 +88,6 @@ public class DestinationMapsActivity extends FragmentActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        mCircles = new ArrayList<>();
 
         mUiHandler = new Handler(Looper.getMainLooper());
         mResultReceiver = new AddressResultReceiver(mUiHandler);

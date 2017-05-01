@@ -79,7 +79,7 @@ public class DestinationOptionsViewHolder extends ChildViewHolder implements
         int proximity = getCalculatedProximity(seekBar.getProgress());
 
         mProximityTextView.setText(String.valueOf(proximity));
-        mListener.onProximityChaged(getParentAdapterPosition(), getChildAdapterPosition(), proximity);
+        mListener.onProximityChanged(getParentAdapterPosition(), getChildAdapterPosition(), proximity);
     }
 
     //translate seekbar values (0 - 10) to our values (100 - 500)

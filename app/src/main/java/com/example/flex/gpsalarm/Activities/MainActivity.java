@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.example.flex.gpsalarm.DestinationAdapter;
@@ -34,6 +35,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
@@ -59,14 +61,12 @@ public class MainActivity extends AppCompatActivity implements
     public static final String EXTRA_KEY_DESTINATIONS = "com.example.flex.gpsalarm.extra.DESTINATIONS";
 
     private final String SHARED_PREFS_KEY_DESTINATIONS = "com.example.flex.gpsalarm.sharedprefs.DESTINATIONS";
+    private final int REQUEST_LOCATION = 0;
 
     //intent codes
     private final int PICK_DESTINATION_CODE = 1;
     private final int EDIT_DESTINATION_CODE = 2;
     private final int PENDING_INTENT_SENDER = 0;
-
-    private final double DEFAULT_LATITUDE = 0.0;
-    private final double DEFAULT_LONGITUDE = 0.0;
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -205,8 +205,8 @@ public class MainActivity extends AppCompatActivity implements
             double latitude, longitude;
 
             address = data.getStringExtra(EXTRA_KEY_ADDRESS);
-            latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
-            longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
+            latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DestinationMapsActivity.DEFAULT_LATITUDE);
+            longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DestinationMapsActivity.DEFAULT_LONGITUDE);
 
             if (requestCode == PICK_DESTINATION_CODE) {
                 DestinationHeader destination = new DestinationHeader(address, false, mDestinationOptions);
@@ -286,7 +286,6 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.notifyParentInserted(parentPosition);
                 mRecyclerView.scrollToPosition(parentPosition);
 
-                //String requestId = destination.getId();
                 double latitude = destination.getLatitude();
                 double longitude = destination.getLongitude();
                 float proximity = destination.getChildList().get(childPosition).getProximity();
@@ -322,8 +321,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onProximityChaged(int parentPosition, int childPosition, int proximity) {
-        mDestinations.get(parentPosition).getChildList().get(childPosition).setProximity(proximity);
+    public void onProximityChanged(int parentPosition, int childPosition, int proximity) {
+        DestinationHeader destination = mDestinations.get(parentPosition);
+        destination.getChildList().get(childPosition).setProximity(proximity);
+
+        removeGeofence(destination.getId());
+        addGeofence(destination.getId(), destination.getLatitude(), destination.getLongitude(), proximity);
     }
 
     @Override
@@ -342,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            requestLocationPermissions();
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -361,6 +365,24 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_LOCATION) {
+            if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //permission granted
+            }
+            else {
+                //display a toast/message saying adding new alarms will be disabled until they turn it on
+/*                View layout = findViewById(R.id.coordinatorlayout_main);
+                Snackbar.make(layout, "",
+                        Snackbar.LENGTH_SHORT).show();*/
+            }
+        }
+        else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
     public void onConnectionSuspended(int i) {
 
     }
@@ -372,7 +394,24 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onResult(@NonNull Status status) {
+        int statusCode = status.getStatusCode();
 
+        switch(statusCode) {
+            case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE: {
+                Toast.makeText(this, "Could not add alarm. Please turn on your location!", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES: {
+                Toast.makeText(this, "Could not add alarm. Too many alarms are on! ", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS: {
+                Toast.makeText(this, "Could not add alarm. Internal error!", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     /* Helpers */
@@ -393,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            requestLocationPermissions();
             return;
         }
         PendingIntent mGeofencePendingIntent = getGeofencePendingIntent();
@@ -455,6 +495,10 @@ public class MainActivity extends AppCompatActivity implements
                 .setAction("Undo", listener);
 
         snackbar.show();
+    }
+
+    private void requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
     }
 
     //save the current list of destinations into shared preferences

@@ -42,6 +42,7 @@ public class FetchAddressIntentService extends IntentService {
 
     public FetchAddressIntentService() {
         super("FetchAddress");
+        mErrorMessage = "";
     }
 
     @Override

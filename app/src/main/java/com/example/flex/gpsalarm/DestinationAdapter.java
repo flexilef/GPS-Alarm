@@ -22,7 +22,7 @@ public class DestinationAdapter
         void onDestinationClicked(int position);
         void onDeleteClicked(int parentPosition, int childPosition);
         void onSwitchClicked(int parentPosition, int childPosition, boolean switchValue);
-        void onProximityChaged(int parentPosition, int childPosition, int proximity);
+        void onProximityChanged(int parentPosition, int childPosition, int proximity);
         void onLabelChanged(int position, String label);
     }
 
