@@ -20,8 +20,10 @@ public class DestinationAdapter
 {
     public interface DestinationItemListener {
         void onDestinationClicked(int position);
-        void onDeleteClicked(int position);
-        void onSwitchClicked(int position, boolean switchValue);
+        void onDeleteClicked(int parentPosition, int childPosition);
+        void onSwitchClicked(int parentPosition, int childPosition, boolean switchValue);
+        void onProximityChaged(int parentPosition, int childPosition, int proximity);
+        void onLabelChanged(int position, String label);
     }
 
     private static final String LOG_TAG = DestinationAdapter.class.getSimpleName();
