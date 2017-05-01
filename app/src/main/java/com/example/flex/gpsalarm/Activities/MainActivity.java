@@ -247,21 +247,27 @@ public class MainActivity extends AppCompatActivity implements
     /* Start DestinationItemListener functions */
 
     @Override
-    public void onDestinationClicked(int position) {
-        Log.d(LOG_TAG, "Destination Position " + position);
+    //TODO: refactor getProximity() by creating a function within destination header itself
+    public void onDestinationClicked(int parentPosition) {
+        Log.d(LOG_TAG, "Destination Position " + parentPosition);
 
-        double latitude = mDestinations.get(position).getLatitude();
-        double longitude = mDestinations.get(position).getLongitude();
-        mEditDestinationIndex = position;
+        DestinationHeader destination = mDestinations.get(parentPosition);
+
+        double latitude = destination.getLatitude();
+        double longitude = destination.getLongitude();
+        int proximity = destination.getChildList().get(0).getProximity(); //0 because only 1 option in list
+        mEditDestinationIndex = parentPosition;
 
         Intent mapsIntent = new Intent(this, DestinationMapsActivity.class);
         mapsIntent.putExtra(EXTRA_KEY_LATITUDE, latitude);
         mapsIntent.putExtra(EXTRA_KEY_LONGITUDE, longitude);
+        mapsIntent.putExtra(EXTRA_KEY_PROXIMITY, proximity);
 
         startActivityForResult(mapsIntent, EDIT_DESTINATION_CODE);
     }
 
     @Override
+    //TODO: refactor these listener functions by removing childPosition (only 1 option in list)
     public void onDeleteClicked(final int parentPosition, final int childPosition) {
         Log.d(LOG_TAG, "Delete Position " + parentPosition);
 
@@ -272,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements
         mDestinations.remove(parentPosition);
         mAdapter.notifyParentRemoved(parentPosition);
 
-        //generate an snackbar to undo deletion
+        //generate a snackbar to undo deletion
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
