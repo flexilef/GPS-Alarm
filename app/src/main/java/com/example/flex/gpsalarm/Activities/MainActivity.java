@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.example.flex.gpsalarm.DestinationAdapter;
@@ -34,6 +35,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
@@ -59,14 +61,12 @@ public class MainActivity extends AppCompatActivity implements
     public static final String EXTRA_KEY_DESTINATIONS = "com.example.flex.gpsalarm.extra.DESTINATIONS";
 
     private final String SHARED_PREFS_KEY_DESTINATIONS = "com.example.flex.gpsalarm.sharedprefs.DESTINATIONS";
+    private final int REQUEST_LOCATION = 0;
 
     //intent codes
     private final int PICK_DESTINATION_CODE = 1;
     private final int EDIT_DESTINATION_CODE = 2;
     private final int PENDING_INTENT_SENDER = 0;
-
-    private final double DEFAULT_LATITUDE = 0.0;
-    private final double DEFAULT_LONGITUDE = 0.0;
 
     private DestinationAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -81,7 +81,10 @@ public class MainActivity extends AppCompatActivity implements
     private Map<String, Geofence> mRequestIdToGeofence;
 
     //variable storing position of destination selected for edit in list (0 index)
-    private int mEditDestinationIndex = -1;
+    private int mEditDestinationIndex;
+    //variable storing positoin of destination where switch was clicked
+    private int mSwitchClickedIndex;
+    private boolean mIsAddingGeofence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements
         buildGoogleApiClient();
 
         mGeofencePendingIntent = null;
+        mEditDestinationIndex = -1;
+        mSwitchClickedIndex = -1;
+        mIsAddingGeofence = false;
+
         mGeofencesToDelete = new ArrayList<>();
         mRequestIdToGeofence = new HashMap<>();
         mDestinationOptions = new ArrayList<>();
@@ -158,26 +165,25 @@ public class MainActivity extends AppCompatActivity implements
         super.onStop();
     }
 
-    //TODO: remove the options menu
+    //TODO: Add an about page to credit icon artists
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    //TODO: remove options menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+/*        int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
@@ -205,8 +211,8 @@ public class MainActivity extends AppCompatActivity implements
             double latitude, longitude;
 
             address = data.getStringExtra(EXTRA_KEY_ADDRESS);
-            latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
-            longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
+            latitude = data.getDoubleExtra(EXTRA_KEY_LATITUDE, DestinationMapsActivity.DEFAULT_LATITUDE);
+            longitude = data.getDoubleExtra(EXTRA_KEY_LONGITUDE, DestinationMapsActivity.DEFAULT_LONGITUDE);
 
             if (requestCode == PICK_DESTINATION_CODE) {
                 DestinationHeader destination = new DestinationHeader(address, false, mDestinationOptions);
@@ -286,7 +292,6 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.notifyParentInserted(parentPosition);
                 mRecyclerView.scrollToPosition(parentPosition);
 
-                //String requestId = destination.getId();
                 double latitude = destination.getLatitude();
                 double longitude = destination.getLongitude();
                 float proximity = destination.getChildList().get(childPosition).getProximity();
@@ -305,6 +310,8 @@ public class MainActivity extends AppCompatActivity implements
             return;
         }
 
+        mSwitchClickedIndex = parentPosition;
+
         DestinationHeader destination = mDestinations.get(parentPosition);
         destination.setSwitchChecked(isChecked);
 
@@ -322,8 +329,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onProximityChaged(int parentPosition, int childPosition, int proximity) {
-        mDestinations.get(parentPosition).getChildList().get(childPosition).setProximity(proximity);
+    public void onProximityChanged(int parentPosition, int childPosition, int proximity) {
+        DestinationHeader destination = mDestinations.get(parentPosition);
+        destination.getChildList().get(childPosition).setProximity(proximity);
+
+        if(destination.isSwitchChecked()) {
+            removeGeofence(destination.getId());
+            addGeofence(destination.getId(), destination.getLatitude(), destination.getLongitude(), proximity);
+        }
     }
 
     @Override
@@ -334,14 +347,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         //get last location to pass to map activity
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestLocationPermissions();
+
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -361,6 +370,27 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_LOCATION) {
+            if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location permissions enabled!", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                //auto turn off alarm
+                if(mSwitchClickedIndex >= 0) {
+                    mDestinations.get(mSwitchClickedIndex).setSwitchChecked(false);
+                    mAdapter.notifyParentChanged(mSwitchClickedIndex);
+                }
+
+                Toast.makeText(this, "Alarms are not tracked! Enable location permissions!", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
     public void onConnectionSuspended(int i) {
 
     }
@@ -372,12 +402,33 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onResult(@NonNull Status status) {
+        int statusCode = status.getStatusCode();
 
+        if(mIsAddingGeofence) {
+            switch (statusCode) {
+                case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE: {
+                    Toast.makeText(this, "Alarms are not tracked! Location not available!", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES: {
+                    Toast.makeText(this, "Could not add alarm. Too many alarms are on! ", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS: {
+                    Toast.makeText(this, "Could not add alarm. Internal error!", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
 
     /* Helpers */
 
     private void addGeofence(String requestId, double latitude, double longitude, float radius) {
+        mIsAddingGeofence = true;
+
         mRequestIdToGeofence.put(requestId, new Geofence.Builder()
                 .setRequestId(requestId)
                 .setCircularRegion(latitude, longitude, radius)
@@ -386,13 +437,8 @@ public class MainActivity extends AppCompatActivity implements
                 .build());
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            requestLocationPermissions();
+
             return;
         }
         PendingIntent mGeofencePendingIntent = getGeofencePendingIntent();
@@ -404,6 +450,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void removeGeofence(String requestId) {
+        mIsAddingGeofence = false;
+
         List<String> geofenceIds = new ArrayList<>();
         geofenceIds.add(requestId);
 
@@ -455,6 +503,10 @@ public class MainActivity extends AppCompatActivity implements
                 .setAction("Undo", listener);
 
         snackbar.show();
+    }
+
+    private void requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
     }
 
     //save the current list of destinations into shared preferences

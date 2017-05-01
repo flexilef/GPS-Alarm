@@ -54,7 +54,7 @@
         android:contentDescription="@string/content_desc_expand"
         android:padding="12dp"
         android:tint="@color/colorPrimary"
-        app:srcCompat="@drawable/expand_arrow_48" />
+        app:srcCompat="@drawable/expand_arrow_96" />
 
     <View
         android:id="@+id/destination_view_divider"

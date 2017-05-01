@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.example.flex.gpsalarm.Activities.MainActivity;
@@ -95,8 +96,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.alarm_clock_50)
-                .setColor(Color.BLUE)
+                .setSmallIcon(R.drawable.ic_map_marker_96)
+                .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
                 .setAutoCancel(true)
                 .setSound(alarmSound)
                 .setContentTitle("Destination Reached!")
