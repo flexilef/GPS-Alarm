@@ -8,7 +8,7 @@
     <string name="invalid_lat_long_used">Invalid latitude/longitude</string>
     <string name="no_address_found">No address found</string>
     <string name="address_found">Address found</string>
-    <string name="updating_location">Updating location &amp;#8230</string>
+    <string name="updating_location">Updating location…</string>
 
     <!-- destinationheader_view layout -->
     <string name="content_desc_expand">Expand button</string>
@@ -19,7 +19,7 @@
     <string name="content_desc_delete">Delete button</string>
     <string name="text_delete">Delete</string>
     <string name="text_hint_label">Label</string>
-    <string name="text_hint_proximity">Proximity</string>
+    <string name="text_proximity_label">Proximity (meters): </string>
 
     <!-- activity_destination_maps Activity -->
     <string name="button_destination">Set Destination</string>

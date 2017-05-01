@@ -99,7 +99,8 @@ public class DestinationHeaderViewHolder extends ParentViewHolder {
                     mDestinationText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.colorTextDisabled));
                 }
 
-                listener.onSwitchClicked(getParentAdapterPosition(), isChecked);
+                //0 because only one list of options
+                listener.onSwitchClicked(getParentAdapterPosition(), 0, isChecked);
             }
         });
     }

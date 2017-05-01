@@ -7,12 +7,14 @@ package com.example.flex.gpsalarm;
 public class DestinationOptions {
     private static final String LOG_TAG = DestinationOptions.class.getSimpleName();
 
+    public static final int DEFAULT_PROXIMITY = 100;
+
     private String mLabel;
     private int mProximity;
 
     public DestinationOptions() {
         mLabel = "";
-        mProximity = 100;
+        mProximity = DEFAULT_PROXIMITY;
     }
 
     public DestinationOptions(String label, int proximity) {

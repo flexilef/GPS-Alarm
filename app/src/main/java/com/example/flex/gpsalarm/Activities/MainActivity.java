@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements
     //intent extras keys
     public static final String EXTRA_KEY_LATITUDE = "com.example.flex.gpsalarm.extra.LATITUDE";
     public static final String EXTRA_KEY_LONGITUDE = "com.example.flex.gpsalarm.extra.LONGITUDE";
+    public static final String EXTRA_KEY_PROXIMITY = "com.example.flex.gpsalarm.extra.PROXIMITY";
     public static final String EXTRA_KEY_ADDRESS = "com.example.flex.gpsalarm.extra.ADDRESS";
     public static final String EXTRA_KEY_DESTINATIONS = "com.example.flex.gpsalarm.extra.DESTINATIONS";
 
@@ -135,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (mLastLocation != null) {
                     mapsIntent.putExtra(EXTRA_KEY_LATITUDE, mLastLocation.getLatitude());
                     mapsIntent.putExtra(EXTRA_KEY_LONGITUDE, mLastLocation.getLongitude());
+                    mapsIntent.putExtra(EXTRA_KEY_PROXIMITY, DestinationOptions.DEFAULT_PROXIMITY);
                 }
 
                 startActivityForResult(mapsIntent, PICK_DESTINATION_CODE);
@@ -260,31 +262,31 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDeleteClicked(final int position) {
-        Log.d(LOG_TAG, "Delete Position " + position);
+    public void onDeleteClicked(final int parentPosition, final int childPosition) {
+        Log.d(LOG_TAG, "Delete Position " + parentPosition);
 
-        final DestinationHeader destination = mDestinations.get(position);
+        final DestinationHeader destination = mDestinations.get(parentPosition);
         final String requestId = destination.getId();
 
         removeGeofence(requestId);
-        mDestinations.remove(position);
-        mAdapter.notifyParentRemoved(position);
+        mDestinations.remove(parentPosition);
+        mAdapter.notifyParentRemoved(parentPosition);
 
         //generate an snackbar to undo deletion
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDestinations.add(position, destination);
-                mAdapter.notifyParentInserted(position);
-                mRecyclerView.scrollToPosition(position);
+                mDestinations.add(parentPosition, destination);
+                mAdapter.notifyParentInserted(parentPosition);
+                mRecyclerView.scrollToPosition(parentPosition);
 
                 //String requestId = destination.getId();
                 double latitude = destination.getLatitude();
                 double longitude = destination.getLongitude();
-                float radius = 100;
+                float proximity = destination.getChildList().get(childPosition).getProximity();
 
                 if (destination.isSwitchChecked()) {
-                    addGeofence(requestId, latitude, longitude, radius);
+                    addGeofence(requestId, latitude, longitude, proximity);
                 }
             }
         };
@@ -292,25 +294,35 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onSwitchClicked(int position, boolean isChecked) {
+    public void onSwitchClicked(int parentPosition, int childPosition, boolean isChecked) {
         if (!mGoogleApiClient.isConnected()) {
             return;
         }
 
-        DestinationHeader destination = mDestinations.get(position);
+        DestinationHeader destination = mDestinations.get(parentPosition);
         destination.setSwitchChecked(isChecked);
 
         String requestId = destination.getId();
         double latitude = destination.getLatitude();
         double longitude = destination.getLongitude();
-        float radius = 100.0f;
+        float proximity = destination.getChildList().get(childPosition).getProximity();
 
         if (!isChecked) {
             removeGeofence(requestId);
         }
         if (isChecked) {
-            addGeofence(requestId, latitude, longitude, radius);
+            addGeofence(requestId, latitude, longitude, proximity);
         }
+    }
+
+    @Override
+    public void onProximityChaged(int parentPosition, int childPosition, int proximity) {
+        mDestinations.get(parentPosition).getChildList().get(childPosition).setProximity(proximity);
+    }
+
+    @Override
+    public void onLabelChanged(int position, String label) {
+
     }
 
     @Override

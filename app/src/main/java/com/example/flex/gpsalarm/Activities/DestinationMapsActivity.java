@@ -17,17 +17,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.flex.gpsalarm.DestinationOptions;
 import com.example.flex.gpsalarm.R;
 import com.example.flex.gpsalarm.Services.FetchAddressIntentService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_ADDRESS;
 import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_LATITUDE;
 import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_LONGITUDE;
+import static com.example.flex.gpsalarm.Activities.MainActivity.EXTRA_KEY_PROXIMITY;
+import static com.example.flex.gpsalarm.DestinationOptions.DEFAULT_PROXIMITY;
 
 public class DestinationMapsActivity extends FragmentActivity implements
         OnMapReadyCallback {
@@ -59,9 +67,12 @@ public class DestinationMapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private Button mSetDestinationButton;
     private TextView mDestinationText;
+    private CircleOptions mCircleOptions;
+    private List<Circle> mCircles;
 
     private double mDestinationLatitude;
     private double mDestinationLongitude;
+    private int mMarkerRadius;
     private String mDestinationAddress;
 
     private Location mDestinationLocation;
@@ -77,6 +88,8 @@ public class DestinationMapsActivity extends FragmentActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        mCircles = new ArrayList<>();
 
         mUiHandler = new Handler(Looper.getMainLooper());
         mResultReceiver = new AddressResultReceiver(mUiHandler);
@@ -119,9 +132,16 @@ public class DestinationMapsActivity extends FragmentActivity implements
 
         mDestinationLatitude = getIntent().getDoubleExtra(EXTRA_KEY_LATITUDE, DEFAULT_LATITUDE);
         mDestinationLongitude = getIntent().getDoubleExtra(EXTRA_KEY_LONGITUDE, DEFAULT_LONGITUDE);
+        mMarkerRadius = getIntent().getIntExtra(EXTRA_KEY_PROXIMITY, DEFAULT_PROXIMITY);
 
         LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
+
+        mCircleOptions = new CircleOptions()
+                .center(initPosition)
+                .radius(mMarkerRadius)
+                .fillColor(R.color.colorAccentLight);
+        mMap.addCircle(mCircleOptions);
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -140,6 +160,12 @@ public class DestinationMapsActivity extends FragmentActivity implements
                 mDestinationLocation = new Location("");
                 mDestinationLocation.setLatitude(mDestinationLatitude);
                 mDestinationLocation.setLongitude(mDestinationLongitude);
+
+                LatLng newPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
+                mCircleOptions.center(newPosition);
+
+                mMap.clear();
+                mMap.addCircle(mCircleOptions);
 
                 startFetchAddressIntentService();
             }
