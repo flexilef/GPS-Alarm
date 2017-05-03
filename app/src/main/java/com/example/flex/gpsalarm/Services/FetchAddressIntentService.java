@@ -58,21 +58,21 @@ public class FetchAddressIntentService extends IntentService {
         }
         catch(IOException ioException) {
             mErrorMessage = getString(R.string.service_not_available);
-            Log.e(LOG_TAG, mErrorMessage, ioException);
+            //Log.e(LOG_TAG, mErrorMessage, ioException);
         }
         catch (IllegalArgumentException illegalArgumentException) {
             // Catch invalid latitude or longitude values.
             mErrorMessage = getString(R.string.invalid_lat_long_used);
-            Log.e(LOG_TAG, mErrorMessage + ". " +
+            /*Log.e(LOG_TAG, mErrorMessage + ". " +
                     "Latitude = " + mLocation.getLatitude() +
-                    ", Longitude = " + mLocation.getLongitude(), illegalArgumentException);
+                    ", Longitude = " + mLocation.getLongitude(), illegalArgumentException);*/
         }
 
         // Handle case where no address was found
         if (addresses == null || addresses.size() == 0) {
             if (mErrorMessage.isEmpty()) {
                 mErrorMessage = getString(R.string.no_address_found);
-                Log.e(LOG_TAG, mErrorMessage);
+                //Log.e(LOG_TAG, mErrorMessage);
             }
 
             deliverResultToReceiver(Constants.FAILURE_RESULT, mErrorMessage);
@@ -86,7 +86,7 @@ public class FetchAddressIntentService extends IntentService {
                 addressFragments.add(address.getAddressLine(i));
             }
 
-            Log.i(LOG_TAG, getString(R.string.address_found));
+            //Log.i(LOG_TAG, getString(R.string.address_found));
             deliverResultToReceiver(Constants.SUCCESS_RESULT,
                     TextUtils.join(System.getProperty("line.separator"), addressFragments));
         }

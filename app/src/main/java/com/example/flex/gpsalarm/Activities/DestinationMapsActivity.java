@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.flex.gpsalarm.DestinationOptions;
 import com.example.flex.gpsalarm.R;
@@ -63,7 +65,9 @@ public class DestinationMapsActivity extends FragmentActivity implements
     public static final double DEFAULT_LATITUDE = 37.7749;
     public static final double DEFAULT_LONGITUDE = -122.4194;
 
+    //to make Google logo visible
     private final int MAP_PADDING_BOTTOM_DP = 120;
+    private final int REQUEST_LOCATION = 0;
 
     private GoogleMap mMap;
     private Button mSetDestinationButton;
@@ -99,8 +103,6 @@ public class DestinationMapsActivity extends FragmentActivity implements
         mSetDestinationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(LOG_TAG, "Clicked on set destination");
-
                 Intent setDestinationIntent = new Intent(v.getContext(), MainActivity.class);
 
                 setDestinationIntent.putExtra(EXTRA_KEY_LATITUDE, mDestinationLatitude);
@@ -133,7 +135,7 @@ public class DestinationMapsActivity extends FragmentActivity implements
         mMarkerRadius = getIntent().getIntExtra(EXTRA_KEY_PROXIMITY, DEFAULT_PROXIMITY);
 
         LatLng initPosition = new LatLng(mDestinationLatitude, mDestinationLongitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 15.0f)); //15.0f = city zoom level
 
         mCircleOptions = new CircleOptions()
                 .center(initPosition)
@@ -170,6 +172,22 @@ public class DestinationMapsActivity extends FragmentActivity implements
         });
     }
 
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_LOCATION) {
+            if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location permissions enabled!", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(this, "Cannot track your location. Enable location permissions!", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
     /* Helpers */
 
     private double getPixelsFromDp(int dp) {
@@ -181,13 +199,8 @@ public class DestinationMapsActivity extends FragmentActivity implements
     private void enableMyLocation(GoogleMap map) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            requestLocationPermissions();
+
             return;
         }
         map.setMyLocationEnabled(true);
@@ -200,5 +213,9 @@ public class DestinationMapsActivity extends FragmentActivity implements
         intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, mDestinationLocation);
 
         startService(intent);
+    }
+
+    private void requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
     }
 }

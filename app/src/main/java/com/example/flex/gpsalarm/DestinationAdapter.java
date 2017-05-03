@@ -56,7 +56,6 @@ public class DestinationAdapter
     // onBind ...
     @Override
     public void onBindParentViewHolder(@NonNull DestinationHeaderViewHolder destinationHeaderViewHolder, int parentPosition, @NonNull DestinationHeader destinationHeader) {
-        Log.d(LOG_TAG, "Switched on: " + destinationHeader.isSwitchChecked());
         //TODO: see if you can pass in the child view holder or viewgroup so that you can modify it here
         destinationHeaderViewHolder.bind(destinationHeader);
     }

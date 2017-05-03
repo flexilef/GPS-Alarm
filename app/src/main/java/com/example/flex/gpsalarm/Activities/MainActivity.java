@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private final String SHARED_PREFS_KEY_DESTINATIONS = "com.example.flex.gpsalarm.sharedprefs.DESTINATIONS";
     private final int REQUEST_LOCATION = 0;
-
     //intent codes
     private final int PICK_DESTINATION_CODE = 1;
     private final int EDIT_DESTINATION_CODE = 2;
@@ -80,9 +79,9 @@ public class MainActivity extends AppCompatActivity implements
     private List<String> mGeofencesToDelete;
     private Map<String, Geofence> mRequestIdToGeofence;
 
-    //variable storing position of destination selected for edit in list (0 index)
+    //the destination alarm selected for edit
     private int mEditDestinationIndex;
-    //variable storing positoin of destination where switch was clicked
+    //position of destination alarm whose switch was clicked
     private int mSwitchClickedIndex;
     private boolean mIsAddingGeofence;
 
@@ -103,8 +102,8 @@ public class MainActivity extends AppCompatActivity implements
 
         mGeofencesToDelete = new ArrayList<>();
         mRequestIdToGeofence = new HashMap<>();
-        mDestinationOptions = new ArrayList<>();
         mDestinations = new ArrayList<>();
+        mDestinationOptions = new ArrayList<>();
         mDestinationOptions.add(new DestinationOptions());
 
         //has to be called after mDestinations is instantiated in order to populate it
@@ -123,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.collapseAllParents();
                 mAdapter.expandParent(parentPosition);
 
-                //scroll to top so that entire destination list item is visible (including options)
+                //scroll expanded destination lalarm to the top
                 mLayoutManager.scrollToPositionWithOffset(parentPosition, 0);
             }
 
@@ -137,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(LOG_TAG, "fab clicked");
                 Intent mapsIntent = new Intent(view.getContext(), DestinationMapsActivity.class);
 
                 if (mLastLocation != null) {
@@ -178,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-/*        int id = item.getItemId();
+        /*int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -218,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements
                 DestinationHeader destination = new DestinationHeader(address, false, mDestinationOptions);
                 destination.setLatitude(latitude);
                 destination.setLongitude(longitude);
-                mDestinations.add(destination);
 
+                mDestinations.add(destination);
                 int destinationsCount = mDestinations.size();
 
                 mAdapter.notifyParentInserted(destinationsCount - 1);
@@ -231,19 +229,16 @@ public class MainActivity extends AppCompatActivity implements
                 DestinationHeader destination = new DestinationHeader(address, false, mDestinationOptions);
                 destination.setLatitude(latitude);
                 destination.setLongitude(longitude);
+
                 mDestinations.set(mEditDestinationIndex, destination);
 
                 mAdapter.notifyParentChanged(mEditDestinationIndex);
                 mRecyclerView.scrollToPosition(mEditDestinationIndex);
 
-                //remove the old geofence (user will manually switch on this new destination/geofence)
+                //remove the old geofence (new geofence will be added when user switches alarm on)
                 if (mGoogleApiClient.isConnected()) {
-                    Log.d(LOG_TAG, "IS Connected");
-
                     removeGeofence(oldRequestId);
                 } else {
-                    Log.d(LOG_TAG, "IS NOT Connected");
-
                     mGeofencesToDelete.add(oldRequestId);
                 }
             }
@@ -254,14 +249,14 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     //TODO: refactor getProximity() by creating a function within destination header itself
+    // and refactor these listener functions by removing childPosition() (only 1 option in list)
     public void onDestinationClicked(int parentPosition) {
-        Log.d(LOG_TAG, "Destination Position " + parentPosition);
-
         DestinationHeader destination = mDestinations.get(parentPosition);
 
         double latitude = destination.getLatitude();
         double longitude = destination.getLongitude();
         int proximity = destination.getChildList().get(0).getProximity(); //0 because only 1 option in list
+
         mEditDestinationIndex = parentPosition;
 
         Intent mapsIntent = new Intent(this, DestinationMapsActivity.class);
@@ -273,10 +268,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    //TODO: refactor these listener functions by removing childPosition (only 1 option in list)
     public void onDeleteClicked(final int parentPosition, final int childPosition) {
-        Log.d(LOG_TAG, "Delete Position " + parentPosition);
-
         final DestinationHeader destination = mDestinations.get(parentPosition);
         final String requestId = destination.getId();
 
@@ -339,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    //TODO: implement this
     @Override
     public void onLabelChanged(int position, String label) {
 
@@ -357,13 +350,10 @@ public class MainActivity extends AppCompatActivity implements
 
         //remove stale geofences
         if(!mGeofencesToDelete.isEmpty()) {
-            Log.d(LOG_TAG, "On Connected");
-
             int geofenceCount = mGeofencesToDelete.size();
 
             for(int i = 0; i < geofenceCount; i++) {
                 removeGeofence(mGeofencesToDelete.get(i));
-                Log.d(LOG_TAG, " REMOVED :" + mGeofencesToDelete.get(i));
                 mGeofencesToDelete.remove(i);
             }
         }
@@ -377,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements
             }
             else {
                 //auto turn off alarm
+                //TODO: check if mSwitchClickedIndex is never reset could cause possible bug
                 if(mSwitchClickedIndex >= 0) {
                     mDestinations.get(mSwitchClickedIndex).setSwitchChecked(false);
                     mAdapter.notifyParentChanged(mSwitchClickedIndex);
@@ -390,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    //TODO: Handle these
     @Override
     public void onConnectionSuspended(int i) {
 
@@ -519,22 +511,7 @@ public class MainActivity extends AppCompatActivity implements
         editor.putString(SHARED_PREFS_KEY_DESTINATIONS, destinationListJson);
 
         editor.apply();
-
-        Log.d(LOG_TAG, "store destination:" + destinationListJson);
     }
-
-/*    private void storeGeofences() {
-        String geofenceListJson = new Gson().toJson(mRequestIdToGeofence);
-
-        SharedPreferences geofencesSharedPrefs = getSharedPreferences(SHARED_PREFS_GEOFENCES_KEY, Context.MODE_PRIVATE);
-        SharedPreferences.Editor geofencesEditor = geofencesSharedPrefs.edit();
-
-        geofencesEditor.putString(SHARED_PREFS_GEOFENCES_KEY, geofenceListJson);
-
-        geofencesEditor.apply();
-
-        Log.d(LOG_TAG, "store geofences:" + geofenceListJson);
-    }*/
 
     //update mDestinations with any saved destinations
     private void restoreDestinations() {
@@ -550,7 +527,21 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-/*    private void restoreGeofences() {
+    //TODO: reimplement these
+    /*private void storeGeofences() {
+        String geofenceListJson = new Gson().toJson(mRequestIdToGeofence);
+
+        SharedPreferences geofencesSharedPrefs = getSharedPreferences(SHARED_PREFS_GEOFENCES_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor geofencesEditor = geofencesSharedPrefs.edit();
+
+        geofencesEditor.putString(SHARED_PREFS_GEOFENCES_KEY, geofenceListJson);
+
+        geofencesEditor.apply();
+
+        Log.d(LOG_TAG, "store geofences:" + geofenceListJson);
+    }*/
+
+    /*private void restoreGeofences() {
         SharedPreferences geofencesSharedPrefs = getSharedPreferences(SHARED_PREFS_GEOFENCES_KEY, Context.MODE_PRIVATE);
 
         String geofenceListJson = geofencesSharedPrefs.getString(SHARED_PREFS_GEOFENCES_KEY, "");

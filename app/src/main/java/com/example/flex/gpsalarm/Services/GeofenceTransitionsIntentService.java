@@ -44,13 +44,10 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(LOG_TAG, LOG_TAG + ": Geo fence was called");
-
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if(geofencingEvent.hasError()) {
             int errorCode = geofencingEvent.getErrorCode();
 
-            Log.d(LOG_TAG, LOG_TAG + ": " + errorCode);
             return;
         }
 
@@ -69,14 +66,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 String id = geofence.getRequestId();
 
                 if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    Log.d(LOG_TAG, LOG_TAG + ": Entering " + id);
+                    //Log.d(LOG_TAG, LOG_TAG + ": Entering " + id);
 
                     String address = getDestinationAddressFromId(id, destinations);
                     sendNotification(address);
                 }
-                //TODO: remove, only keep for debugging
                 else if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                    Log.d(LOG_TAG, LOG_TAG + ": Exiting " + id);
+                    //Log.d(LOG_TAG, LOG_TAG + ": Exiting " + id);
                 }
             }
         }
@@ -84,7 +80,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     /* Helpers */
 
-    //TODO: hardcoded strings should be put in xml
     private void sendNotification(String address) {
         Intent mainIntent = new Intent(this, MainActivity.class);
 
